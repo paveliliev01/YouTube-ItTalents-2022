@@ -1,8 +1,7 @@
 package com.youtube_project.model.entities;
 
 import com.sun.istack.NotNull;
-import com.youtube_project.model.relationships.videoreaction.VideoReaction;
-import lombok.EqualsAndHashCode;
+import com.youtube_project.model.relationships.videoreactions.VideoReaction;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,8 +9,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -59,13 +56,13 @@ public class User {
     @Column
     private String backgroundImage;
     @OneToMany(mappedBy = "user")
-    private List<VideoReaction> reactions;
-    @ManyToMany(mappedBy = "followers")
-    private List<User> subscribedTo;
+    private List<VideoReaction> reactedVideos;
+    @ManyToMany(mappedBy = "subscriptions")
+    private List<User> followers;
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "subscribers",
             joinColumns = {@JoinColumn(name = "subscriber_id")},
             inverseJoinColumns = {@JoinColumn(name = "subscribed_to")})
-    private List<User> followers;
+    private Set<User> subscriptions;
 
 }

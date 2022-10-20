@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -15,7 +16,10 @@ public class UserController extends MasterController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO register(@RequestBody UserRegistrationDTO userDTO) {
+    public UserResponseDTO register(@RequestBody UserRegistrationDTO userDTO, HttpServletRequest request) {
+        if (sessionManager.isUserLogged(request)) {
+            throw new BadRequestException("You are already logged.You cannot register while being logged in!!");
+        }
         return userService.register(userDTO);
     }
 
@@ -54,6 +58,7 @@ public class UserController extends MasterController {
     }
 
     @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
     public String logout(HttpServletRequest request) {
         sessionManager.validateLogin(request);
         String name = getUserById((long) request.getSession().getAttribute("user_id")).getFirstName();
@@ -69,22 +74,45 @@ public class UserController extends MasterController {
     }
 
     @GetMapping("/getByName")
-    @ResponseStatus
+    @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDTO> getAllByName(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName) {
         return userService.getAllUsersByName(firstName, lastName);
     }
 
     @PutMapping("/edit")
+    @ResponseStatus(HttpStatus.OK)
     public UserEditProfileDTO editProfileInfo(@RequestBody UserEditProfileDTO dto, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         return userService.edit(sessionManager.getSessionUserId(request), dto);
     }
 
     @GetMapping("/followers")
+    @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDTO> getFollowers(HttpServletRequest request){
         sessionManager.validateLogin(request);
         return userService.getFollowers(sessionManager.getSessionUserId(request));
     }
+
+    @GetMapping("/subscriptions")
+    @ResponseStatus(HttpStatus.OK)
+    public Set<UserResponseDTO> getSubscriptions(HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return userService.getSubscriptions(sessionManager.getSessionUserId(request));
+    }
+
+    @PostMapping("/subscribe/{uid}")
+    @ResponseStatus(HttpStatus.OK)
+    public String subscribeToAUser(@PathVariable long uid,HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return userService.subscribe(uid,sessionManager.getSessionUserId(request));
+    }
+    @PostMapping("/unsubscribe/{uid}")
+    @ResponseStatus(HttpStatus.OK)
+    public String unSubscribeFromAUser(@PathVariable long uid,HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return userService.unsubscribe(uid,sessionManager.getSessionUserId(request));
+    }
+
 
 
 }

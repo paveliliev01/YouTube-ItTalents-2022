@@ -5,6 +5,8 @@ import com.youtube_project.model.entities.User;
 import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,6 +27,9 @@ public class UserService extends AbstractService {
     public static final int USER_ADDITIONAL_INFO_MAX_LENGTH = 2000;
     public static final int TOTAL_VALID_NUMBER_OF_ROLES = 2; // number of existing roles in DB (consecutive numbers)
     public static final int TOTAL_VALID_NUMBER_OF_GENDERS = 3; // number of existing genders in DB (consecutive numbers)
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     public UserResponseDTO register(UserRegistrationDTO userDTO) {
         // validate user information from json (editable)
@@ -56,8 +61,6 @@ public class UserService extends AbstractService {
             throw new NotFoundException("Wrong credentials");
         }
         User u = user.get(0);
-        System.out.println(loginPassword);
-        System.out.println(u.getPassword());
 
         if(!passwordEncoder.matches(loginPassword,u.getPassword())){
             throw new UnauthorizedException("Wrong credentials");
@@ -78,7 +81,6 @@ public class UserService extends AbstractService {
         }
         User u = user.get(0);
 
-        System.out.println(!passwordEncoder.matches(userLoginWithPhoneNumDTO.getPassword(),u.getPassword()));
         if(!passwordEncoder.matches(userLoginWithPhoneNumDTO.getPassword(),u.getPassword())){
             throw new UnauthorizedException("Wrong credentials");
         }
@@ -92,6 +94,10 @@ public class UserService extends AbstractService {
             throw new NotFoundException("No users to be shown");
         }
         return users.stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
+    }
+
+    public List<UserResponseDTO> getAllUsersByName(String firstName, String lastName) {
+        return userRepository.findAllByFirstNameAndLastName(firstName, lastName).stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
     }
 
     public boolean deleteUserAccount(long id) {
@@ -215,44 +221,37 @@ public class UserService extends AbstractService {
         return modelMapper.map(user,UserEditProfileDTO.class);
     }
 
-  /*  public void checkForUserInformation(UserRegistrationDTO userDTO) {
-
-        String email = userDTO.getEmail().trim();
-        String firstName = userDTO.getFirstName().trim();
-        String lastName = userDTO.getLastName().trim();
-        LocalDate dateOfBirth = userDTO.getDateOfBirth();
-        String phoneNumber = userDTO.getPhoneNumber().trim();
-        String password = userDTO.getPassword();
-
-        if (firstName.length() > NAME_MAX_LENGTH || lastName.length() > NAME_MAX_LENGTH){
-            throw new BadRequestException("Invalid name length");
-        }
-        if (!email.matches(VALID_EMAIL_ADDRESS_REGEX) || email.length() > USER_EMAIL_MAX_LENGTH || email.isEmpty() || email.trim().isEmpty()) {
-            throw new BadRequestException("Invalid email");
-        }
-        if (!password.matches(VALID_PASSWORD_REGEX)) {
-            throw new BadRequestException("Bad password");
-        }
-        if (!userDTO.getPassword().equals(userDTO.getConfirmPassword())) {
-            throw new BadRequestException("PASSWORD MISMATCH");
-        }
-        if (userRepository.findAllByEmail(userDTO.getEmail()).size() > 0) {
-            throw new BadRequestException("USER WITH SUCH EMAIL ALREADY EXISTS");
-        }
-        if (phoneNumber.matches(USER_VALID_PHONE_NUMBER) || userRepository.findAllByPhoneNumber(userDTO.getPhoneNumber()).size() > 0) {
-            throw new BadRequestException("USER WITH SUCH PHONE NUMBER ALREADY EXISTS");
-        }
-        if (dateOfBirth == null){
-            throw new BadRequestException("YOU SHOULD SELECT YOUR DATE OF BIRTH");
-        }
-        if (dateOfBirth.isAfter(LocalDate.now().minusYears(13))) {
-            throw new UnauthorizedException("You should be at least 13 years old");
-        }
-    }*/
-
+    public Set<UserResponseDTO> getSubscriptions(long userId){
+        User u = getUserById(userId);
+        Set<User> followers = u.getSubscriptions();
+        return followers.stream().map(user -> modelMapper.map(user,UserResponseDTO.class)).collect(Collectors.toSet());
+    }
     public List<UserResponseDTO> getFollowers(long userId){
         User u = getUserById(userId);
-        List<User> followers = u.getFollowers();
-        return followers.stream().map(user -> modelMapper.map(user,UserResponseDTO.class)).collect(Collectors.toList());
+        List<User> subscriptions = u.getFollowers();
+        return subscriptions.stream().map(user -> modelMapper.map(user,UserResponseDTO.class)).collect(Collectors.toList());
+    }
+
+
+    public String subscribe(long subscribeToId,long uid) {
+        User u = getUserById(uid);
+        User userToSubscribeTo = getUserById(subscribeToId);
+        if (u.getSubscriptions().contains(userToSubscribeTo)){
+            throw new BadRequestException("You are already subscribed to this user");
+        }
+        u.getSubscriptions().add(userToSubscribeTo);
+        userRepository.save(u);
+        return "Subscribed to " + userToSubscribeTo.getFirstName();
+    }
+
+    public String unsubscribe(long subscribeToId, long uid) {
+        User u = getUserById(uid);
+        User userToSubscribeTo = getUserById(subscribeToId);
+        if (u.getSubscriptions().contains(userToSubscribeTo)){
+            throw new BadRequestException("You are already unsubscribed from this user");
+        }
+        u.getSubscriptions().remove(userToSubscribeTo);
+        userRepository.save(u);
+        return "Unsubscribed from " + userToSubscribeTo.getFirstName();
     }
 }
