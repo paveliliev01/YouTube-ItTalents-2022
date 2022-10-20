@@ -13,7 +13,6 @@ import java.util.List;
 @RequestMapping("/videos")
 public class VideoController extends MasterController{
 
-
     @PostMapping("/upload")
     @ResponseStatus(HttpStatus.CREATED)
     public VideoDTO uploadVideo(@RequestBody VideoUploadDTO video, HttpServletRequest request){
@@ -37,9 +36,14 @@ public class VideoController extends MasterController{
     @PostMapping("/{vid}/like")
     public boolean likeVideo(@PathVariable long vid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return videoService.like(vid,sessionManager.getSessionUserId(request));
+        return videoService.reactToVideo(vid,sessionManager.getSessionUserId(request),'l');
     }
 
+    @PostMapping("/{vid}/dislike")
+    public boolean dislikeVideo(@PathVariable long vid,HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return videoService.reactToVideo(vid,sessionManager.getSessionUserId(request),'d');
+    }
     @GetMapping("/likedVideo")
     public List<VideoWithNoOwnerDTO> getAllLikedVideos(HttpServletRequest request) {
         sessionManager.validateLogin(request);

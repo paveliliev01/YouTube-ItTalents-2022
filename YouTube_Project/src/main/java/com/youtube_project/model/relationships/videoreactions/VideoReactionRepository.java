@@ -1,4 +1,4 @@
-package com.youtube_project.model.relationships.videoreaction;
+package com.youtube_project.model.relationships.videoreactions;
 
 import com.youtube_project.model.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface VideoReactionRepository extends JpaRepository<VideoReaction, VideoReactionKey> {
-    List<VideoReaction> findAllByUserAndReaction(User videoId,char reaction);
+    List<VideoReaction> findAllByUserAndReaction(User videoId, char reaction);
 }

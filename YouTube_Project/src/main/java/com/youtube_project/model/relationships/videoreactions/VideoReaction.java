@@ -1,4 +1,4 @@
-package com.youtube_project.model.relationships.videoreaction;
+package com.youtube_project.model.relationships.videoreactions;
 
 import com.youtube_project.model.entities.User;
 import com.youtube_project.model.entities.Video;

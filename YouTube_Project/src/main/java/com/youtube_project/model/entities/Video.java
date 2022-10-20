@@ -1,13 +1,12 @@
 package com.youtube_project.model.entities;
 
-import com.youtube_project.model.relationships.videoreaction.VideoReaction;
-import com.youtube_project.model.entities.User;
+import com.youtube_project.model.relationships.videoreactions.VideoReaction;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Component
 @Data
@@ -33,7 +32,9 @@ public class Video {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private boolean isPrivate;
     @OneToMany(mappedBy = "video")
-    Set<VideoReaction> ratings;
+    private List<VideoReaction> videoReactions;
+    @OneToMany(mappedBy = "video")
+    private List<Comment> comments;
 
 
 }

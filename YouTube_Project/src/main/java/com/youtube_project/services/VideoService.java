@@ -5,19 +5,16 @@ import com.youtube_project.model.dtos.video.VideoUploadDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.NotFoundException;
-import com.youtube_project.model.relationships.videoreaction.VideoReaction;
-import com.youtube_project.model.relationships.videoreaction.VideoReactionKey;
-import com.youtube_project.model.relationships.videoreaction.VideoReactionRepository;
+import com.youtube_project.model.relationships.videoreactions.VideoReaction;
+import com.youtube_project.model.relationships.videoreactions.VideoReactionKey;
 import com.youtube_project.model.entities.User;
 import com.youtube_project.model.dtos.user.UserResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 @Service
 public class VideoService extends AbstractService {
@@ -50,10 +47,10 @@ public class VideoService extends AbstractService {
         return videoDTOS;
     }
 
-    public boolean like(long videoId,long userId) {
-        System.out.println(userId);
+    public boolean reactToVideo(long videoId, long userId, char reaction) {
+
         User u = getUserById(userId);
-        System.out.println(userId);
+
         VideoReaction videoReaction = new VideoReaction();
         VideoReactionKey videoReactionKey = new VideoReactionKey();
         videoReactionKey.setVideoId(videoId);
@@ -62,8 +59,9 @@ public class VideoService extends AbstractService {
         videoReaction.setVideo(videoRepository.findById(videoId).get());
         videoReaction.setUser(u);
         videoReaction.setId(videoReactionKey);
-        videoReaction.setReaction('l');
-        if (videoReactionRepository.findById(videoReactionKey).isPresent()){
+        videoReaction.setReaction(reaction);
+
+        if (videoReactionRepository.findById(videoReactionKey).isPresent() && videoReactionRepository.findById(videoReactionKey).get().getReaction() == reaction){
             videoReactionRepository.delete(videoReaction);
             return false;
         }
