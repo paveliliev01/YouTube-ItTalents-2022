@@ -1,9 +1,8 @@
 package com.youtube_project.contollers;
 
-import com.youtube_project.models.exceptions.UnauthorizedException;
-import com.youtube_project.models.video.VideoDTO;
-import com.youtube_project.models.video.VideoUploadDTO;
-import com.youtube_project.models.video.VideoWithNoOwnerDTO;
+import com.youtube_project.model.dtos.video.VideoDTO;
+import com.youtube_project.model.dtos.video.VideoUploadDTO;
+import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 

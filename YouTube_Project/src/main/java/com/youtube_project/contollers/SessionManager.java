@@ -1,6 +1,6 @@
 package com.youtube_project.contollers;
 
-import com.youtube_project.models.exceptions.UnauthorizedException;
+import com.youtube_project.model.exceptions.UnauthorizedException;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,24 +15,25 @@ public class SessionManager {
 
     public void validateLogin(HttpServletRequest request) {
         HttpSession session = request.getSession();
+        String sessionIp = (String) session.getAttribute(REMOTE_IP);
+        String requestIp = request.getRemoteAddr();
         boolean newSession = session.isNew();
         boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
         boolean userIdIsNull = session.getAttribute(USER_ID) == null;
+        boolean ipCheck = requestIp.equals(sessionIp);
         if (userIdIsNull || newSession || !logged) {
             throw new UnauthorizedException("You have to log in");
+        }
+        // check if request is from the same ip logged in the session
+        if(!ipCheck){
+            session.invalidate();
+            throw new UnauthorizedException("Dont steal sessions!");
         }
 
     }
 
     public Long getSessionUserId(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String ip = request.getRemoteAddr();
-        if (session.getAttribute(USER_ID) == null ||
-                        session.isNew() ||
-                        !session.getAttribute(REMOTE_IP).equals(ip)) {
-            throw new UnauthorizedException("You have to log in");
-        }
-        return (long) session.getAttribute(USER_ID);
+        return (long) request.getSession().getAttribute(USER_ID);
     }
 
     public void setSession(HttpServletRequest request, long userId) {
