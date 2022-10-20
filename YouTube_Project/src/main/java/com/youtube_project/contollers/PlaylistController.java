@@ -1,10 +1,9 @@
 package com.youtube_project.contollers;
 
-import com.youtube_project.models.playlist.Playlist;
-import com.youtube_project.models.playlist.PlaylistDTO;
-import com.youtube_project.models.playlist.PlaylistRepository;
-import com.youtube_project.models.playlist.PlaylistAddDTO;
-import com.youtube_project.models.user.UserRepository;
+import com.youtube_project.model.dtos.playlist.PlaylistDTO;
+import com.youtube_project.model.repositories.PlaylistRepository;
+import com.youtube_project.model.dtos.playlist.PlaylistAddDTO;
+import com.youtube_project.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
