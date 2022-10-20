@@ -1,6 +1,6 @@
 package com.youtube_project.contollers;
-import com.youtube_project.models.comment.CommentAddDTO;
-import com.youtube_project.models.comment.CommentDTO;
+import com.youtube_project.model.dtos.comment.CommentAddDTO;
+import com.youtube_project.model.dtos.comment.CommentDTO;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 

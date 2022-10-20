@@ -1,14 +1,12 @@
 package com.youtube_project.contollers;
 
-import com.youtube_project.models.exceptions.BadRequestException;
-import com.youtube_project.models.user.*;
+import com.youtube_project.model.dtos.user.*;
+import com.youtube_project.model.exceptions.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -36,12 +34,8 @@ public class UserController extends MasterController {
     @PostMapping("/auth/email")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public UserResponseDTO loginWithEmail(@RequestBody UserLoginWithEmailDTO userLoginWithEmailDTO, HttpServletRequest request) {
-        HttpSession session = request.getSession();
         if (sessionManager.isUserLogged(request)) {
             throw new BadRequestException("You are already logged");
-        }
-        if (userLoginWithEmailDTO.getEmail() == null || userLoginWithEmailDTO.getPassword() == null) {
-            throw new BadRequestException("Wrong credentials");
         }
         UserResponseDTO dto = userService.login(userLoginWithEmailDTO);
         sessionManager.setSession(request, dto.getId());
@@ -77,16 +71,17 @@ public class UserController extends MasterController {
     @GetMapping("/getByName")
     @ResponseStatus
     public List<UserResponseDTO> getAllByName(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName) {
-        return userService.getAllByName(firstName, lastName);
+        return userService.getAllUsersByName(firstName, lastName);
     }
 
     @PutMapping("/edit")
     public UserEditProfileDTO editProfileInfo(@RequestBody UserEditProfileDTO dto, HttpServletRequest request) {
+        sessionManager.validateLogin(request);
         return userService.edit(sessionManager.getSessionUserId(request), dto);
     }
 
     @GetMapping("/followers")
-    public Set<UserResponseDTO> getFollowers(HttpServletRequest request){
+    public List<UserResponseDTO> getFollowers(HttpServletRequest request){
         sessionManager.validateLogin(request);
         return userService.getFollowers(sessionManager.getSessionUserId(request));
     }

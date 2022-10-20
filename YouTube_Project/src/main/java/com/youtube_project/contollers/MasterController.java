@@ -1,13 +1,13 @@
 package com.youtube_project.contollers;
 
-import com.youtube_project.models.comment.CommentService;
-import com.youtube_project.models.exceptions.BadRequestException;
-import com.youtube_project.models.exceptions.ErrorDTO;
-import com.youtube_project.models.exceptions.NotFoundException;
-import com.youtube_project.models.exceptions.UnauthorizedException;
-import com.youtube_project.models.playlist.PlaylistService;
-import com.youtube_project.models.user.UserService;
-import com.youtube_project.models.video.VideoService;
+import com.youtube_project.services.CommentService;
+import com.youtube_project.model.exceptions.BadRequestException;
+import com.youtube_project.model.exceptions.ErrorDTO;
+import com.youtube_project.model.exceptions.NotFoundException;
+import com.youtube_project.model.exceptions.UnauthorizedException;
+import com.youtube_project.services.PlaylistService;
+import com.youtube_project.services.UserService;
+import com.youtube_project.services.VideoService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
