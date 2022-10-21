@@ -247,7 +247,7 @@ public class UserService extends AbstractService {
     public String unsubscribe(long subscribeToId, long uid) {
         User u = getUserById(uid);
         User userToSubscribeTo = getUserById(subscribeToId);
-        if (u.getSubscriptions().contains(userToSubscribeTo)){
+        if (!u.getSubscriptions().contains(userToSubscribeTo)){
             throw new BadRequestException("You are already unsubscribed from this user");
         }
         u.getSubscriptions().remove(userToSubscribeTo);
