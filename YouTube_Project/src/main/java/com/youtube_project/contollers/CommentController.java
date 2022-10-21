@@ -20,11 +20,11 @@ public class CommentController extends MasterController {
         return commentService.addComment(comment,vid,sessionManager.getSessionUserId(request));
     }
 
-    @DeleteMapping("/{cid}")
+    @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> deleteCommentById(@PathVariable int cid, HttpServletRequest request){
+    public ResponseEntity<String> deleteCommentById(@RequestParam long vid,@RequestParam int cid, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        commentService.deleteById(cid,sessionManager.getSessionUserId(request));
+        commentService.deleteById(vid,cid,sessionManager.getSessionUserId(request));
         return ResponseEntity.status(204).body("Comment deleted successfully!");
     }
 
