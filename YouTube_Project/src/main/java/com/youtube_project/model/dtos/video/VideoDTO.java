@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDate;
 @Data
 public class VideoDTO {
-    private int id;
+    private long id;
     private String title;
     private String description;
     private UserResponseDTO owner;
