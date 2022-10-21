@@ -7,6 +7,7 @@ import com.youtube_project.model.dtos.user.UserResponseDTO;
 import com.youtube_project.model.entities.Comment;
 import com.youtube_project.model.entities.User;
 import com.youtube_project.model.entities.Video;
+import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
 import com.youtube_project.model.relationships.commentsreactions.CommentReaction;
@@ -71,10 +72,14 @@ public class CommentService extends AbstractService {
     }
 
     @Transactional(rollbackForClassName = "SQLException.class")
-    public void deleteById(long cid, long uid) {
+    public void deleteById(long vid,long cid, long uid) {
+        Video video = getVideoById(vid);
         Comment comment = getCommentById(cid);
         if (comment.getOwner().getId() != uid){
             throw new UnauthorizedException("This is not your comment to delete!");
+        }
+        if (!video.getComments().contains(comment)){
+            throw new BadRequestException("The comment you are trying to delete doesn't exist");
         }
         commentRepository.deleteById(cid);
     }
