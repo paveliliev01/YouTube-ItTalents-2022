@@ -25,6 +25,9 @@ import java.util.stream.Collectors;
 @Service
 public class VideoService extends AbstractService {
 
+    public static final int MAX_TITLE_LENGTH = 100;
+    public static final int MAX_DESCRIPTION_LENGTH = 200;
+
     public VideoDTO getById(long id){
         System.out.println(id);
         Video v = getVideoById(id);
@@ -33,8 +36,20 @@ public class VideoService extends AbstractService {
         return dto;
     }
 
+    private void validateVideoInfo(String title,String description){
+        if(title.isEmpty() || title.length() > MAX_TITLE_LENGTH){
+            throw new BadRequestException("Incorrect video title");
+        }
+        if (description.isEmpty() || description.length() > MAX_DESCRIPTION_LENGTH){
+            throw new BadRequestException("Incorrect description!");
+        }
+    }
     public String upload(long uid,MultipartFile file,String title,String description,boolean isPrivate) {
         try {
+            title = title.trim();
+            description = description.trim();
+            validateVideoInfo(title,description);
+
             User user = getUserById(uid);
             String extension = FilenameUtils.getExtension(file.getOriginalFilename());
             String videoURL = "uploads" + File.separator + "videos" +File.separator+ System.nanoTime() + "_" + uid + "." + extension;
@@ -55,7 +70,6 @@ public class VideoService extends AbstractService {
             video.setPrivate(isPrivate);
 
             videoRepository.save(video);
-            System.out.println(video.getId());
 
             return "Successfully uploaded " + file.getName();
         } catch (IOException e) {
