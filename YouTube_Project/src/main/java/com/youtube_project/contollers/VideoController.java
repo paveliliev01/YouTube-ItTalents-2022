@@ -72,4 +72,11 @@ public class VideoController extends MasterController{
         return videoService.watch(vid,loggedUserId);
     }
 
+    @PutMapping("/{vid}/delete")
+    public String deleteVideo(@PathVariable long vid,HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.delete(vid,loggedUserId);
+    }
+
 }

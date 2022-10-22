@@ -6,6 +6,7 @@ import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
+import com.youtube_project.model.exceptions.UnauthorizedException;
 import com.youtube_project.model.relationships.videoreactions.VideoReaction;
 import com.youtube_project.model.relationships.videoreactions.VideoReactionKey;
 import com.youtube_project.model.entities.User;
@@ -137,5 +138,16 @@ public class VideoService extends AbstractService {
         }
         VideoResponseDTO vDTO = videoToResponseVideoDTO(video);
         return vDTO;
+    }
+
+    public String delete(long vid, long loggedUserId) {
+        Video video = getVideoById(vid);
+        if(video.getOwner().getId() != loggedUserId){
+            throw new UnauthorizedException("You're not the owner of the video");
+        }
+        File f = new File(video.getVideoURL());
+        f.delete();
+        videoRepository.delete(video);
+        return "Video has been deleted successfully";
     }
 }
