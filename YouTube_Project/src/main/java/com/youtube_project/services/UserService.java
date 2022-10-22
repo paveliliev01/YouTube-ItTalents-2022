@@ -5,10 +5,15 @@ import com.youtube_project.model.entities.User;
 import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -247,11 +252,36 @@ public class UserService extends AbstractService {
     public String unsubscribe(long subscribeToId, long uid) {
         User u = getUserById(uid);
         User userToSubscribeTo = getUserById(subscribeToId);
-        if (u.getSubscriptions().contains(userToSubscribeTo)){
+        if (!u.getSubscriptions().contains(userToSubscribeTo)){
             throw new BadRequestException("You are already unsubscribed from this user");
         }
         u.getSubscriptions().remove(userToSubscribeTo);
         userRepository.save(u);
         return "Unsubscribed from " + userToSubscribeTo.getFirstName();
+    }
+
+    public String uploadProfilePhoto(MultipartFile photo, long uid) {
+        try {
+            User user = getUserById(uid);
+            String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
+            String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + uid + "." + extension;
+            File f = new File(fileURL);
+            if(!f.exists()){
+                Files.copy(photo.getInputStream(),f.toPath());
+            }else {
+                f.delete();
+                Files.copy(photo.getInputStream(),f.toPath());
+            }
+            if(user.getProfilePhoto() != null){
+                File old = new File(user.getProfilePhoto());
+                old.delete();
+            }
+            user.setProfilePhoto(fileURL);
+            userRepository.save(user);
+
+            return "Successfully uploaded " + photo.getName();
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage(),e);
+        }
     }
 }

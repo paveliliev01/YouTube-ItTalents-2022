@@ -4,6 +4,7 @@ import com.youtube_project.model.dtos.user.*;
 import com.youtube_project.model.exceptions.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -113,6 +114,11 @@ public class UserController extends MasterController {
         return userService.unsubscribe(uid,sessionManager.getSessionUserId(request));
     }
 
-
+    @PostMapping("/{uid}/profile_photo")
+    @ResponseStatus(HttpStatus.CREATED)
+    public String uploadProfilePhoto(@PathVariable(value = "uid") long uid, @RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return userService.uploadProfilePhoto(photo,uid);
+    }
 
 }

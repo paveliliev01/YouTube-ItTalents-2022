@@ -5,6 +5,7 @@ import com.youtube_project.model.dtos.video.VideoUploadDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -13,11 +14,16 @@ import java.util.List;
 @RequestMapping("/videos")
 public class VideoController extends MasterController{
 
-    @PostMapping("/upload")
+    @PostMapping("/users/{uid}/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public VideoDTO uploadVideo(@RequestBody VideoUploadDTO video, HttpServletRequest request){
+    public String uploadVideo(@PathVariable(value = "uid") long uid,
+                              @RequestParam(value = "file") MultipartFile video,
+                              @RequestParam(value = "title") String title,
+                              @RequestParam(value = "description") String description,
+                              @RequestParam(value = "Private") Boolean isPrivate,
+                              HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return videoService.upload(video,sessionManager.getSessionUserId(request));
+        return videoService.upload(uid,video,title,description,isPrivate);
     }
 
     @GetMapping("/{id}")

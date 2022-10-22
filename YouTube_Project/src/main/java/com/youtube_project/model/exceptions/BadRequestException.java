@@ -6,6 +6,10 @@ public class BadRequestException extends RuntimeException {
         super(msg);
     }
 
+    public BadRequestException(String msg,Throwable cause){
+        super(msg,cause);
+    }
+
     /**
      * Gets a result.
      *

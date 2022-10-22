@@ -4,12 +4,18 @@ import com.youtube_project.model.dtos.video.VideoDTO;
 import com.youtube_project.model.dtos.video.VideoUploadDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.Video;
+import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.relationships.videoreactions.VideoReaction;
 import com.youtube_project.model.relationships.videoreactions.VideoReactionKey;
 import com.youtube_project.model.entities.User;
 import com.youtube_project.model.dtos.user.UserResponseDTO;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +33,34 @@ public class VideoService extends AbstractService {
         return dto;
     }
 
-    public VideoDTO upload(VideoUploadDTO dto, long userId) {
-        User u = getUserById(userId);
-        Video video = modelMapper.map(dto,Video.class);
-        video.setDateOfUpload(LocalDate.now());
-        video.setOwner(u);
-        video.setVideoURL(video.getTitle().toLowerCase().trim().strip()+new Random().nextInt(1000));
-        videoRepository.save(video);
-        return modelMapper.map(video,VideoDTO.class);
+    public String upload(long uid,MultipartFile file,String title,String description,boolean isPrivate) {
+        try {
+            User user = getUserById(uid);
+            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+            String videoURL = "uploads" + File.separator + "videos" +File.separator+ System.nanoTime() + "_" + uid + "." + extension;
+            File f = new File(videoURL);
+            if(!f.exists()){
+                Files.copy(file.getInputStream(),f.toPath());
+            }else {
+                //this should never happen!
+                throw new BadRequestException("The file already exists!");
+            }
+
+            Video video = new Video();
+            video.setTitle(title);
+            video.setDescription(description);
+            video.setOwner(user);
+            video.setDateOfUpload(LocalDate.now());
+            video.setVideoURL(videoURL);
+            video.setPrivate(isPrivate);
+
+            videoRepository.save(video);
+            System.out.println(video.getId());
+
+            return "Successfully uploaded " + file.getName();
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage(),e);
+        }
     }
 
     public List<VideoDTO> getByTitle(String title) {

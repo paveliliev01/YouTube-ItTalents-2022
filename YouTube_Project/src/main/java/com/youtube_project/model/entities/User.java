@@ -55,6 +55,9 @@ public class User {
     private String additionalInfo;
     @Column
     private String backgroundImage;
+    @OneToMany(mappedBy = "owner")
+    private Set<Video> videosUploaded;
+
     @OneToMany(mappedBy = "user")
     private List<VideoReaction> reactedVideos;
     @ManyToMany(mappedBy = "subscriptions")
@@ -64,5 +67,6 @@ public class User {
             joinColumns = {@JoinColumn(name = "subscriber_id")},
             inverseJoinColumns = {@JoinColumn(name = "subscribed_to")})
     private Set<User> subscriptions;
-
+    @OneToMany(mappedBy = "owner")
+    private Set<Playlist> playlists;
 }

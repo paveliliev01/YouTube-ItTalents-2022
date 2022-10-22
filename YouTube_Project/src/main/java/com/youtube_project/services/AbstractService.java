@@ -2,10 +2,12 @@ package com.youtube_project.services;
 
 import com.youtube_project.model.dtos.user.UserResponseDTO;
 import com.youtube_project.model.entities.Comment;
+import com.youtube_project.model.entities.Playlist;
 import com.youtube_project.model.entities.User;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.relationships.commentsreactions.CommentReactionRepository;
+import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylistRepository;
 import com.youtube_project.model.relationships.videoreactions.VideoReactionRepository;
 import com.youtube_project.model.repositories.CommentRepository;
 import com.youtube_project.model.repositories.PlaylistRepository;
@@ -32,6 +34,8 @@ public class AbstractService {
     protected PlaylistRepository playlistRepository;
     @Autowired
     protected CommentReactionRepository commentReactionRepository;
+    @Autowired
+    protected VideosInPlaylistRepository videosInPlaylistRepository;
 
     protected User getUserById(long id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
@@ -43,6 +47,10 @@ public class AbstractService {
 
     protected Comment getCommentById(long id) {
         return commentRepository.findById(id).orElseThrow(() -> new NotFoundException("Comment not found"));
+    }
+
+    protected Playlist getPlaylistById(long id){
+        return playlistRepository.findById(id).orElseThrow(()-> new NotFoundException("Playlist not found"));
     }
 
     protected UserResponseDTO userToUserResponseDTO(User u){
