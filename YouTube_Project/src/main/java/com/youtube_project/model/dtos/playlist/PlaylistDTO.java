@@ -2,7 +2,6 @@ package com.youtube_project.model.dtos.playlist;
 
 import com.youtube_project.model.dtos.user.UserResponseDTO;
 import com.youtube_project.model.dtos.video.VideoDTO;
-import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylistDTO;
 import lombok.Data;
 
 import java.util.Set;

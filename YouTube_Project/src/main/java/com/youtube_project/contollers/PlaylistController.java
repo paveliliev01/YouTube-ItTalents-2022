@@ -2,12 +2,7 @@ package com.youtube_project.contollers;
 
 import com.youtube_project.model.dtos.playlist.PlaylistAddDTO;
 import com.youtube_project.model.dtos.playlist.PlaylistDTO;
-import com.youtube_project.model.dtos.user.UserResponseDTO;
-import com.youtube_project.model.repositories.PlaylistRepository;
-import com.youtube_project.model.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;

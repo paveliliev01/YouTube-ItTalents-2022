@@ -31,6 +31,8 @@ public abstract class MasterController {
     @Autowired
     protected VideoService videoService;
 
+    public static final char LIKE = 'l';
+    public static final char DISLIKE = 'd';
 
 
     private ErrorDTO buildErrorInformation(Exception e, HttpStatus status){

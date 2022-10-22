@@ -35,6 +35,8 @@ public class Video {
     private List<VideoReaction> videoReactions;
     @OneToMany(mappedBy = "video")
     private List<Comment> comments;
+    @ManyToMany(mappedBy = "watchedVideos")
+    private List<User> viewers;
 
 
 }

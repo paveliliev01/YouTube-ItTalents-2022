@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -57,9 +58,15 @@ public class User {
     private String backgroundImage;
     @OneToMany(mappedBy = "owner")
     private Set<Video> videosUploaded;
-
     @OneToMany(mappedBy = "user")
     private List<VideoReaction> reactedVideos;
+    @ManyToMany
+    @JoinTable(
+            name = "users_watched_videos",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "video_id")
+    )
+    private List<Video> watchedVideos;
     @ManyToMany(mappedBy = "subscriptions")
     private List<User> followers;
     @ManyToMany(cascade = {CascadeType.ALL})

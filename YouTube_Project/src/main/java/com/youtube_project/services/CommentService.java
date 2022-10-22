@@ -12,8 +12,6 @@ import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
 import com.youtube_project.model.relationships.commentsreactions.CommentReaction;
 import com.youtube_project.model.relationships.commentsreactions.CommentReactionKey;
-import com.youtube_project.model.relationships.commentsreactions.CommentReactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

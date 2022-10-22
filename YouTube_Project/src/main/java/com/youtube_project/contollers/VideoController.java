@@ -14,6 +14,7 @@ import java.util.List;
 @RequestMapping("/videos")
 public class VideoController extends MasterController{
 
+
     @PostMapping("/users/{uid}/upload")
     @ResponseStatus(HttpStatus.CREATED)
     public String uploadVideo(@PathVariable(value = "uid") long uid,
@@ -41,24 +42,33 @@ public class VideoController extends MasterController{
     @PostMapping("/{vid}/like")
     public boolean likeVideo(@PathVariable long vid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return videoService.reactToVideo(vid,sessionManager.getSessionUserId(request),'l');
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.reactToVideo(vid,loggedUserId, LIKE);
     }
 
     @PostMapping("/{vid}/dislike")
     public boolean dislikeVideo(@PathVariable long vid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return videoService.reactToVideo(vid,sessionManager.getSessionUserId(request),'d');
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.reactToVideo(vid,loggedUserId, DISLIKE);
     }
     @GetMapping("/likedVideo")
     public List<VideoWithNoOwnerDTO> getAllLikedVideos(HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), 'l');
+        return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), LIKE);
     }
 
     @GetMapping("/dislikedVideos")
     public List<VideoWithNoOwnerDTO> getAllDislikedVideos(HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), 'd');
+        return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), DISLIKE);
+    }
+
+    @PostMapping("/{vid}/watch")
+    public int watchVideo(@PathVariable long vid,HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.watch(vid,loggedUserId);
     }
 
 }
