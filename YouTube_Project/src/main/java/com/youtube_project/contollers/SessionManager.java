@@ -48,4 +48,9 @@ public class SessionManager {
         return request.getSession().getAttribute(LOGGED) != null;
     }
 
+    public void checkIfAuthorized(long uid,HttpServletRequest request) {
+        if (getSessionUserId(request) != uid){
+            throw new UnauthorizedException("You're not owner of the account");
+        }
+    }
 }

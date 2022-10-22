@@ -2,6 +2,7 @@ package com.youtube_project.contollers;
 
 import com.youtube_project.model.dtos.user.*;
 import com.youtube_project.model.exceptions.BadRequestException;
+import com.youtube_project.model.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,7 +119,16 @@ public class UserController extends MasterController {
     @ResponseStatus(HttpStatus.CREATED)
     public String uploadProfilePhoto(@PathVariable(value = "uid") long uid, @RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
         sessionManager.validateLogin(request);
+        sessionManager.checkIfAuthorized(uid,request);
         return userService.uploadProfilePhoto(photo,uid);
+    }
+
+    @PostMapping("/{uid}/background_photo")
+    @ResponseStatus(HttpStatus.CREATED)
+    public String uploadBackgroundPhoto(@PathVariable(value = "uid") long uid, @RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        sessionManager.checkIfAuthorized(uid,request);
+        return userService.uploadBackgroundPhoto(photo,uid);
     }
 
 }

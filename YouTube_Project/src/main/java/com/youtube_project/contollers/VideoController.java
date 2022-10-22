@@ -25,6 +25,7 @@ public class VideoController extends MasterController{
                               @RequestParam(value = "Private") Boolean isPrivate,
                               HttpServletRequest request){
         sessionManager.validateLogin(request);
+        sessionManager.checkIfAuthorized(uid,request);
         return videoService.upload(uid,video,title,description,isPrivate);
     }
 

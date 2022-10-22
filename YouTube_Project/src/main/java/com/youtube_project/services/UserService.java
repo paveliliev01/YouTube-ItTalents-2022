@@ -261,27 +261,48 @@ public class UserService extends AbstractService {
     }
 
     public String uploadProfilePhoto(MultipartFile photo, long uid) {
-        try {
             User user = getUserById(uid);
             String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
             String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + uid + "." + extension;
-            File f = new File(fileURL);
-            if(!f.exists()){
-                Files.copy(photo.getInputStream(),f.toPath());
-            }else {
-                f.delete();
-                Files.copy(photo.getInputStream(),f.toPath());
-            }
-            if(user.getProfilePhoto() != null){
-                File old = new File(user.getProfilePhoto());
-                old.delete();
-            }
+
+            saveAndReplacePhotoLocally(photo,fileURL,user);
+
             user.setProfilePhoto(fileURL);
             userRepository.save(user);
 
             return "Successfully uploaded " + photo.getName();
+    }
+
+    public String uploadBackgroundPhoto(MultipartFile photo, long uid) {
+        User user = getUserById(uid);
+        String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
+        String fileURL = "uploads" + File.separator + "background_pictures" +File.separator+ "background_picture_user" + "_" + uid + "." + extension;
+
+        saveAndReplacePhotoLocally(photo,fileURL,user);
+
+        user.setBackgroundImage(fileURL);
+        userRepository.save(user);
+
+        return "Successfully uploaded " + photo.getName();
+    }
+
+    private void saveAndReplacePhotoLocally(MultipartFile photo,String fileURL,User user) {
+        try {
+            File f = new File(fileURL);
+            if(!f.exists()){
+                    Files.copy(photo.getInputStream(),f.toPath());
+            }
+            else {
+                f.delete();
+                Files.copy(photo.getInputStream(),f.toPath());
+            }
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage(),e);
         }
+        if(user.getProfilePhoto() != null){
+            File old = new File(user.getProfilePhoto());
+            old.delete();
+        }
     }
+
 }
