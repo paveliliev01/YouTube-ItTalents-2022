@@ -1,6 +1,7 @@
 package com.youtube_project.contollers;
 
 import com.youtube_project.model.dtos.video.VideoDTO;
+import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoUploadDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import org.springframework.http.HttpStatus;
@@ -29,13 +30,13 @@ public class VideoController extends MasterController{
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.FOUND)
-    public VideoDTO getVideoById(@PathVariable long id){
+    public VideoResponseDTO getVideoById(@PathVariable long id){
         return videoService.getById(id);
     }
 
     @GetMapping("search/{title}")
     @ResponseStatus(HttpStatus.FOUND)
-    public List<VideoDTO> getByTitle(@PathVariable String title){
+    public List<VideoResponseDTO> getByTitle(@PathVariable String title){
         return videoService.getByTitle(title);
     }
 
@@ -52,20 +53,20 @@ public class VideoController extends MasterController{
         long loggedUserId = sessionManager.getSessionUserId(request);
         return videoService.reactToVideo(vid,loggedUserId, DISLIKE);
     }
-    @GetMapping("/likedVideo")
-    public List<VideoWithNoOwnerDTO> getAllLikedVideos(HttpServletRequest request) {
+    @GetMapping("/likedVideos")
+    public List<VideoResponseDTO> getAllLikedVideos(HttpServletRequest request) {
         sessionManager.validateLogin(request);
         return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), LIKE);
     }
 
     @GetMapping("/dislikedVideos")
-    public List<VideoWithNoOwnerDTO> getAllDislikedVideos(HttpServletRequest request) {
+    public List<VideoResponseDTO> getAllDislikedVideos(HttpServletRequest request) {
         sessionManager.validateLogin(request);
         return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), DISLIKE);
     }
 
     @PostMapping("/{vid}/watch")
-    public int watchVideo(@PathVariable long vid,HttpServletRequest request){
+    public VideoResponseDTO watchVideo(@PathVariable long vid,HttpServletRequest request){
         sessionManager.validateLogin(request);
         long loggedUserId = sessionManager.getSessionUserId(request);
         return videoService.watch(vid,loggedUserId);

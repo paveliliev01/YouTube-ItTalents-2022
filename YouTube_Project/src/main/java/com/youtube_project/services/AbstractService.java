@@ -37,6 +37,9 @@ public class AbstractService {
     @Autowired
     protected VideosInPlaylistRepository videosInPlaylistRepository;
 
+    public static final char LIKE = 'l';
+    public static final char DISLIKE = 'd';
+
     protected User getUserById(long id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
     }
@@ -56,5 +59,6 @@ public class AbstractService {
     protected UserResponseDTO userToUserResponseDTO(User u){
         return modelMapper.map(u,UserResponseDTO.class);
     }
+
 
 }

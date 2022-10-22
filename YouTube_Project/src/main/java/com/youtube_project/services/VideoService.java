@@ -1,6 +1,8 @@
 package com.youtube_project.services;
 
+import com.youtube_project.model.dtos.user.UserResponseDTO;
 import com.youtube_project.model.dtos.video.VideoDTO;
+import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
@@ -25,12 +27,18 @@ public class VideoService extends AbstractService {
     public static final int MAX_TITLE_LENGTH = 100;
     public static final int MAX_DESCRIPTION_LENGTH = 200;
 
-    public VideoDTO getById(long id){
-        System.out.println(id);
+    public VideoResponseDTO getById(long id){
         Video v = getVideoById(id);
-        VideoDTO dto = modelMapper.map(v,VideoDTO.class);
-        //dto.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));
+        VideoResponseDTO dto = videoToResponseVideoDTO(v);
         return dto;
+    }
+    private VideoResponseDTO videoToResponseVideoDTO(Video v) {
+        VideoResponseDTO vDTO = modelMapper.map(v,VideoResponseDTO.class);
+        vDTO.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));
+        vDTO.setLikes(videoReactionRepository.findAllByVideoAndReaction(v,LIKE).size());
+        vDTO.setDislikes(videoReactionRepository.findAllByVideoAndReaction(v,DISLIKE).size());
+        vDTO.setViews(v.getViewers().size());
+        return vDTO;
     }
 
     private void validateVideoInfo(MultipartFile file,String title,String description){
@@ -80,10 +88,12 @@ public class VideoService extends AbstractService {
         }
     }
 
-    public List<VideoDTO> getByTitle(String title) {
+    public List<VideoResponseDTO> getByTitle(String title) {
         List<Video> videos = videoRepository.findAllByTitle(title);
-        List<VideoDTO> videoDTOS;
-        videoDTOS = videos.stream().map(video -> modelMapper.map(video,VideoDTO.class)).collect(Collectors.toList());
+        List<VideoResponseDTO> videoDTOS = new ArrayList<>();
+        for (Video v : videos){
+            videoDTOS.add(videoToResponseVideoDTO(v));
+        }
         return videoDTOS;
     }
 
@@ -108,24 +118,24 @@ public class VideoService extends AbstractService {
         return true;
     }
 
-    public List<VideoWithNoOwnerDTO> getAllVideosWithReaction(long id, char c) {
+    public List<VideoResponseDTO> getAllVideosWithReaction(long id, char c) {
         User u = getUserById(id);
         List<VideoReaction> videoReactions = videoReactionRepository.findAllByUserAndReaction(u, c);
-        List<VideoWithNoOwnerDTO> postsLikedList = new ArrayList<>();
+        List<VideoResponseDTO> likedVideos = new ArrayList<>();
         for (VideoReaction videoReaction : videoReactions) {
-            VideoWithNoOwnerDTO postLiked = modelMapper.map(videoReaction.getVideo(), VideoWithNoOwnerDTO.class);
-            postsLikedList.add(postLiked);
+            likedVideos.add(videoToResponseVideoDTO(videoReaction.getVideo()));
         }
-        return postsLikedList;
+        return likedVideos;
     }
 
-    public int watch(long vid, long loggedUserId) {
+    public VideoResponseDTO watch(long vid, long loggedUserId) {
         Video video = getVideoById(vid);
         User user = getUserById(loggedUserId);
         if(!user.getWatchedVideos().contains(video)){
             user.getWatchedVideos().add(video);
             userRepository.save(user);
         }
-        return video.getViewers().size();
+        VideoResponseDTO vDTO = videoToResponseVideoDTO(video);
+        return vDTO;
     }
 }
