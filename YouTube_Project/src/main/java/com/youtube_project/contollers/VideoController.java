@@ -20,17 +20,16 @@ public class VideoController extends MasterController{
         return videoService.upload(video,sessionManager.getSessionUserId(request));
     }
 
-
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.FOUND)
     public VideoDTO getVideoById(@PathVariable long id){
         return videoService.getById(id);
     }
 
-    @GetMapping("search/{name}")
+    @GetMapping("search/{title}")
     @ResponseStatus(HttpStatus.FOUND)
-    public List<VideoDTO> getByName(@PathVariable String name){
-        return videoService.getByName(name);
+    public List<VideoDTO> getByTitle(@PathVariable String title){
+        return videoService.getByTitle(title);
     }
 
     @PostMapping("/{vid}/like")

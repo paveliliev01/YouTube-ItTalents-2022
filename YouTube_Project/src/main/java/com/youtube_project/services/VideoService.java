@@ -4,7 +4,6 @@ import com.youtube_project.model.dtos.video.VideoDTO;
 import com.youtube_project.model.dtos.video.VideoUploadDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.Video;
-import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.relationships.videoreactions.VideoReaction;
 import com.youtube_project.model.relationships.videoreactions.VideoReactionKey;
 import com.youtube_project.model.entities.User;
@@ -15,14 +14,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class VideoService extends AbstractService {
 
     public VideoDTO getById(long id){
-        Video v = videoRepository.findById(id).orElseThrow(()->new NotFoundException("Video not found!"));
+        System.out.println(id);
+        Video v = getVideoById(id);
         VideoDTO dto = modelMapper.map(v,VideoDTO.class);
-        dto.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));
+        //dto.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));
         return dto;
     }
 
@@ -36,14 +37,10 @@ public class VideoService extends AbstractService {
         return modelMapper.map(video,VideoDTO.class);
     }
 
-    public List<VideoDTO> getByName(String name) {
-        List<Video> videos = videoRepository.findAllByTitle(name);
-        List<VideoDTO> videoDTOS = new ArrayList<>();
-        for (Video video : videos) {
-            VideoDTO dto = modelMapper.map(video,VideoDTO.class);
-            dto.setOwner(modelMapper.map(video.getOwner(), UserResponseDTO.class));
-            videoDTOS.add(dto);
-        }
+    public List<VideoDTO> getByTitle(String title) {
+        List<Video> videos = videoRepository.findAllByTitle(title);
+        List<VideoDTO> videoDTOS;
+        videoDTOS = videos.stream().map(video -> modelMapper.map(video,VideoDTO.class)).collect(Collectors.toList());
         return videoDTOS;
     }
 
