@@ -2,6 +2,7 @@ package com.youtube_project.model.entities;
 
 import com.sun.istack.NotNull;
 import com.youtube_project.model.relationships.videoreactions.VideoReaction;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

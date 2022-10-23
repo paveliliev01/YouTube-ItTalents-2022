@@ -58,8 +58,11 @@ public class AbstractService {
         return modelMapper.map(u,UserResponseDTO.class);
     }
 
-    protected Optional<Category> getCategoryByName(String name){
+    protected Optional<Category> getCategoryByNameOptional(String name){
         return categoryRepository.findByName(name);
+    }
+    protected Category getCategoryByName(String name){
+        return categoryRepository.findByName(name).orElseThrow(() -> new NotFoundException("Category not found!"));
     }
 
 }

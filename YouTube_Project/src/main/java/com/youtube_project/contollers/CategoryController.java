@@ -24,4 +24,20 @@ public class CategoryController extends MasterController{
         return categoryService.deleteCategory(categoryDelete);
     }
 
+    @PostMapping("/follow")
+    @ResponseStatus(HttpStatus.OK)
+    public String followCategory(@RequestParam("name") String categoryName, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return categoryService.followCategory(categoryName,loggedUserId);
+    }
+
+    @PostMapping("/unfollow")
+    @ResponseStatus(HttpStatus.OK)
+    public String unfollowCategory(@RequestParam("name") String categoryName, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return categoryService.unfollowCategory(categoryName,loggedUserId);
+    }
+
 }
