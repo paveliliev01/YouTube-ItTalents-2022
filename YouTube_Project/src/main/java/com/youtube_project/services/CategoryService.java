@@ -1,14 +1,21 @@
 package com.youtube_project.services;
 
 import com.youtube_project.model.dtos.category.CategoryAddDTO;
+import com.youtube_project.model.dtos.category.CategoryDTO;
+import com.youtube_project.model.dtos.user.UserResponseDTO;
+import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.entities.Category;
 import com.youtube_project.model.entities.User;
+import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService extends AbstractService{
@@ -63,5 +70,46 @@ public class CategoryService extends AbstractService{
         else {
             throw new BadRequestException("Unable to unfollow, you're not following the category");
         }
+    }
+
+    public String addVideoToCategory(String categoryName, long vid) {
+        Video video = getVideoById(vid);
+        Category category = getCategoryByName(categoryName);
+        if(!video.getCategoriesContainingVideo().contains(category)){
+            video.getCategoriesContainingVideo().add(category);
+            videoRepository.save(video);
+            return "Video added to category " + categoryName;
+        }
+        else {
+            throw new BadRequestException("Video is already in this category!");
+        }
+    }
+
+    public String removeVideoToCategory(String categoryName, long vid) {
+        Video video = getVideoById(vid);
+        Category category = getCategoryByName(categoryName);
+        if(video.getCategoriesContainingVideo().contains(category)){
+            video.getCategoriesContainingVideo().remove(category);
+            videoRepository.save(video);
+            return "Video removed from category " + categoryName;
+        }
+        else {
+            throw new BadRequestException("Video is not in the category!");
+        }
+    }
+
+    public CategoryDTO searchByName(String categoryName) {
+        Category category = getCategoryByName(categoryName);
+        CategoryDTO categoryDTO = modelMapper.map(category,CategoryDTO.class);
+        // map follower -> UserResponseDTO
+        Set<UserResponseDTO> followers = category.getFollowers().stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toSet());
+        categoryDTO.setFollowers(followers);
+        // map video -> VideoResponseDTO
+        Set<VideoResponseDTO> videoResponseDTOS = new HashSet<>();
+        for (Video vid : category.getVideosInCategory()){
+            videoResponseDTOS.add(videoToResponseVideoDTO(vid));
+        }
+        categoryDTO.setVideos(videoResponseDTOS);
+        return categoryDTO;
     }
 }

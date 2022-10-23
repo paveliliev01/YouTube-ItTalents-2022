@@ -1,6 +1,7 @@
 package com.youtube_project.services;
 
 import com.youtube_project.model.dtos.user.UserResponseDTO;
+import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.entities.*;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.relationships.commentsreactions.CommentReactionRepository;
@@ -63,6 +64,15 @@ public class AbstractService {
     }
     protected Category getCategoryByName(String name){
         return categoryRepository.findByName(name).orElseThrow(() -> new NotFoundException("Category not found!"));
+    }
+
+    protected VideoResponseDTO videoToResponseVideoDTO(Video v) {
+        VideoResponseDTO vDTO = modelMapper.map(v,VideoResponseDTO.class);
+        vDTO.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));
+        vDTO.setLikes(videoReactionRepository.findAllByVideoAndReaction(v,LIKE).size());
+        vDTO.setDislikes(videoReactionRepository.findAllByVideoAndReaction(v,DISLIKE).size());
+        vDTO.setViews(v.getViewers().size());
+        return vDTO;
     }
 
 }

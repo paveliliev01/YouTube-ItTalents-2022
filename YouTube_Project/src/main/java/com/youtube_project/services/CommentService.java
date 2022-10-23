@@ -129,8 +129,8 @@ public class CommentService extends AbstractService {
         commentDTO.setText(comment.getText());
         commentDTO.setDateOfCreation(comment.getDateOfCreation());
 
-        int likes = commentReactionRepository.findAllByCommentAndReaction(comment,'l').size();
-        int dislikes = commentReactionRepository.findAllByCommentAndReaction(comment,'d').size();
+        int likes = commentReactionRepository.findAllByCommentAndReaction(comment,LIKE).size();
+        int dislikes = commentReactionRepository.findAllByCommentAndReaction(comment,DISLIKE).size();
 
         commentDTO.setLikes(likes);
         commentDTO.setDislikes(dislikes);

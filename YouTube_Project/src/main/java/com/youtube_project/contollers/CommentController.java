@@ -41,14 +41,14 @@ public class CommentController extends MasterController {
     @ResponseStatus(HttpStatus.OK)
     public boolean likeComment(@PathVariable long cid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),'l');
+        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),LIKE);
     }
 
     @PostMapping("dislike/{cid}")
     @ResponseStatus(HttpStatus.OK)
     public boolean dislikeComment(@PathVariable long cid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),'d');
+        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),DISLIKE);
     }
 
     @PostMapping("/reply/{cid}")

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @Data
@@ -37,6 +38,12 @@ public class Video {
     private List<Comment> comments;
     @ManyToMany(mappedBy = "watchedVideos")
     private List<User> viewers;
-
+    @ManyToMany
+    @JoinTable(
+            name = "videos_in_categories",
+            joinColumns = @JoinColumn(name = "video_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> categoriesContainingVideo;
 
 }

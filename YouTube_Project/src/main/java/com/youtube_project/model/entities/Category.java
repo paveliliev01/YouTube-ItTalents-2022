@@ -19,4 +19,6 @@ public class Category {
     private LocalDate creationDate;
     @ManyToMany(mappedBy = "followedCategories")
     private Set<User> followers;
+    @ManyToMany(mappedBy = "categoriesContainingVideo")
+    private Set<Video> videosInCategory;
 }

@@ -33,14 +33,7 @@ public class VideoService extends AbstractService {
         VideoResponseDTO dto = videoToResponseVideoDTO(v);
         return dto;
     }
-    private VideoResponseDTO videoToResponseVideoDTO(Video v) {
-        VideoResponseDTO vDTO = modelMapper.map(v,VideoResponseDTO.class);
-        vDTO.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));
-        vDTO.setLikes(videoReactionRepository.findAllByVideoAndReaction(v,LIKE).size());
-        vDTO.setDislikes(videoReactionRepository.findAllByVideoAndReaction(v,DISLIKE).size());
-        vDTO.setViews(v.getViewers().size());
-        return vDTO;
-    }
+
 
     private void validateVideoInfo(MultipartFile file,String title,String description){
         if(file.isEmpty()){
