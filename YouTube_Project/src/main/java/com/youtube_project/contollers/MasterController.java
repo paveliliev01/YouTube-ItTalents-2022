@@ -1,13 +1,10 @@
 package com.youtube_project.contollers;
 
-import com.youtube_project.services.CommentService;
+import com.youtube_project.services.*;
 import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.ErrorDTO;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
-import com.youtube_project.services.PlaylistService;
-import com.youtube_project.services.UserService;
-import com.youtube_project.services.VideoService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +27,8 @@ public abstract class MasterController {
     protected PlaylistService playlistService;
     @Autowired
     protected VideoService videoService;
+    @Autowired
+    protected CategoryService categoryService;
 
     public static final char LIKE = 'l';
     public static final char DISLIKE = 'd';

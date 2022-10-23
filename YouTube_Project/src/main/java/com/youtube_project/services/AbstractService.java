@@ -1,21 +1,17 @@
 package com.youtube_project.services;
 
 import com.youtube_project.model.dtos.user.UserResponseDTO;
-import com.youtube_project.model.entities.Comment;
-import com.youtube_project.model.entities.Playlist;
-import com.youtube_project.model.entities.User;
-import com.youtube_project.model.entities.Video;
+import com.youtube_project.model.entities.*;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.relationships.commentsreactions.CommentReactionRepository;
 import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylistRepository;
 import com.youtube_project.model.relationships.videoreactions.VideoReactionRepository;
-import com.youtube_project.model.repositories.CommentRepository;
-import com.youtube_project.model.repositories.PlaylistRepository;
-import com.youtube_project.model.repositories.UserRepository;
-import com.youtube_project.model.repositories.VideoRepository;
+import com.youtube_project.model.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AbstractService {
@@ -32,6 +28,8 @@ public class AbstractService {
     protected VideoRepository videoRepository;
     @Autowired
     protected PlaylistRepository playlistRepository;
+    @Autowired
+    protected CategoryRepository categoryRepository;
     @Autowired
     protected CommentReactionRepository commentReactionRepository;
     @Autowired
@@ -60,5 +58,8 @@ public class AbstractService {
         return modelMapper.map(u,UserResponseDTO.class);
     }
 
+    protected Optional<Category> getCategoryByName(String name){
+        return categoryRepository.findByName(name);
+    }
 
 }
