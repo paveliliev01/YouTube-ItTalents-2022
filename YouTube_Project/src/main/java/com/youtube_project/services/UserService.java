@@ -7,6 +7,8 @@ import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -101,8 +103,9 @@ public class UserService extends AbstractService {
         return users.stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
     }
 
-    public List<UserResponseDTO> getAllUsersByName(String firstName, String lastName) {
-        return userRepository.findAllByFirstNameAndLastName(firstName, lastName).stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
+    public List<UserResponseDTO> getAllUsersByName(String firstName, String lastName, int pageNumber, int rowNumbers) {
+        Pageable page = PageRequest.of(pageNumber,rowNumbers);
+        return userRepository.findAllByFirstNameAndLastName(firstName, lastName,page).stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
     }
 
     public boolean deleteUserAccount(long id) {
@@ -260,10 +263,10 @@ public class UserService extends AbstractService {
         return "Unsubscribed from " + userToSubscribeTo.getFirstName();
     }
 
-    public String uploadProfilePhoto(MultipartFile photo, long loggedUserId) {
-            User user = getUserById(loggedUserId);
+    public String uploadProfilePhoto(MultipartFile photo, long uid) {
+            User user = getUserById(uid);
             String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-            String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + loggedUserId + "." + extension;
+            String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + uid + "." + extension;
 
             saveAndReplacePhotoLocally(photo,fileURL,user);
 
@@ -273,10 +276,10 @@ public class UserService extends AbstractService {
             return "Successfully uploaded " + photo.getName();
     }
 
-    public String uploadBackgroundPhoto(MultipartFile photo, long loggedUseId) {
-        User user = getUserById(loggedUseId);
+    public String uploadBackgroundPhoto(MultipartFile photo, long uid) {
+        User user = getUserById(uid);
         String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-        String fileURL = "uploads" + File.separator + "background_pictures" +File.separator+ "background_picture_user" + "_" + loggedUseId + "." + extension;
+        String fileURL = "uploads" + File.separator + "background_pictures" +File.separator+ "background_picture_user" + "_" + uid + "." + extension;
 
         saveAndReplacePhotoLocally(photo,fileURL,user);
 
