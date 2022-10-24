@@ -16,40 +16,39 @@ import java.util.List;
 public class VideoController extends MasterController{
 
 
-    @PostMapping("/users/{uid}/upload")
+    @PostMapping("/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadVideo(@PathVariable(value = "uid") long uid,
-                              @RequestParam(value = "file") MultipartFile video,
+    public String uploadVideo(@RequestParam(value = "file") MultipartFile video,
                               @RequestParam(value = "title") String title,
                               @RequestParam(value = "description") String description,
                               @RequestParam(value = "Private") Boolean isPrivate,
                               HttpServletRequest request){
         sessionManager.validateLogin(request);
-        sessionManager.checkIfAuthorized(uid,request);
-        return videoService.upload(uid,video,title,description,isPrivate);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.upload(loggedUserId,video,title,description,isPrivate);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{vid}")
     @ResponseStatus(HttpStatus.FOUND)
-    public VideoResponseDTO getVideoById(@PathVariable long id){
-        return videoService.getById(id);
+    public VideoResponseDTO getVideoById(@PathVariable long vid){
+        return videoService.getById(vid);
     }
 
-    @GetMapping("search/{title}")
+    @GetMapping("/search")
     @ResponseStatus(HttpStatus.FOUND)
-    public List<VideoResponseDTO> getByTitle(@PathVariable String title){
+    public List<VideoResponseDTO> getByTitle(@RequestParam(value = "title") String title){
         return videoService.getByTitle(title);
     }
 
     @PostMapping("/{vid}/like")
-    public boolean likeVideo(@PathVariable long vid,HttpServletRequest request){
+    public String likeVideo(@PathVariable long vid,HttpServletRequest request){
         sessionManager.validateLogin(request);
         long loggedUserId = sessionManager.getSessionUserId(request);
         return videoService.reactToVideo(vid,loggedUserId, LIKE);
     }
 
     @PostMapping("/{vid}/dislike")
-    public boolean dislikeVideo(@PathVariable long vid,HttpServletRequest request){
+    public String dislikeVideo(@PathVariable long vid,HttpServletRequest request){
         sessionManager.validateLogin(request);
         long loggedUserId = sessionManager.getSessionUserId(request);
         return videoService.reactToVideo(vid,loggedUserId, DISLIKE);
@@ -57,13 +56,15 @@ public class VideoController extends MasterController{
     @GetMapping("/likedVideos")
     public List<VideoResponseDTO> getAllLikedVideos(HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), LIKE);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.getAllVideosWithReaction(loggedUserId, LIKE);
     }
 
     @GetMapping("/dislikedVideos")
     public List<VideoResponseDTO> getAllDislikedVideos(HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return videoService.getAllVideosWithReaction(sessionManager.getSessionUserId(request), DISLIKE);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.getAllVideosWithReaction(loggedUserId, DISLIKE);
     }
 
     @PostMapping("/{vid}/watch")

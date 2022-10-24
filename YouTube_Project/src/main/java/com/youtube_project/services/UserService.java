@@ -260,10 +260,10 @@ public class UserService extends AbstractService {
         return "Unsubscribed from " + userToSubscribeTo.getFirstName();
     }
 
-    public String uploadProfilePhoto(MultipartFile photo, long uid) {
-            User user = getUserById(uid);
+    public String uploadProfilePhoto(MultipartFile photo, long loggedUserId) {
+            User user = getUserById(loggedUserId);
             String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-            String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + uid + "." + extension;
+            String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + loggedUserId + "." + extension;
 
             saveAndReplacePhotoLocally(photo,fileURL,user);
 
@@ -273,10 +273,10 @@ public class UserService extends AbstractService {
             return "Successfully uploaded " + photo.getName();
     }
 
-    public String uploadBackgroundPhoto(MultipartFile photo, long uid) {
-        User user = getUserById(uid);
+    public String uploadBackgroundPhoto(MultipartFile photo, long loggedUseId) {
+        User user = getUserById(loggedUseId);
         String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-        String fileURL = "uploads" + File.separator + "background_pictures" +File.separator+ "background_picture_user" + "_" + uid + "." + extension;
+        String fileURL = "uploads" + File.separator + "background_pictures" +File.separator+ "background_picture_user" + "_" + loggedUseId + "." + extension;
 
         saveAndReplacePhotoLocally(photo,fileURL,user);
 

@@ -115,20 +115,20 @@ public class UserController extends MasterController {
         return userService.unsubscribe(uid,sessionManager.getSessionUserId(request));
     }
 
-    @PostMapping("/{uid}/profile_photo")
+    @PostMapping("/profile_photo")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadProfilePhoto(@PathVariable(value = "uid") long uid, @RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
+    public String uploadProfilePhoto(@RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        sessionManager.checkIfAuthorized(uid,request);
-        return userService.uploadProfilePhoto(photo,uid);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return userService.uploadProfilePhoto(photo,loggedUserId);
     }
 
-    @PostMapping("/{uid}/background_photo")
+    @PostMapping("/background_photo")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadBackgroundPhoto(@PathVariable(value = "uid") long uid, @RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
+    public String uploadBackgroundPhoto(@RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        sessionManager.checkIfAuthorized(uid,request);
-        return userService.uploadBackgroundPhoto(photo,uid);
+        long loggedUseId = sessionManager.getSessionUserId(request);
+        return userService.uploadBackgroundPhoto(photo,loggedUseId);
     }
 
 }

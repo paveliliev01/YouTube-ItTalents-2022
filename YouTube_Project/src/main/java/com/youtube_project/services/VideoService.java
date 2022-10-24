@@ -49,15 +49,15 @@ public class VideoService extends AbstractService {
             throw new BadRequestException("Invalid video format!");
         }
     }
-    public String upload(long uid,MultipartFile file,String title,String description,boolean isPrivate) {
+    public String upload(long loggedUserId,MultipartFile file,String title,String description,boolean isPrivate) {
         try {
             title = title.trim();
             description = description.trim();
             validateVideoInfo(file,title,description);
 
-            User user = getUserById(uid);
+            User user = getUserById(loggedUserId);
             String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-            String videoURL = "uploads" + File.separator + "videos" +File.separator+ System.nanoTime() + "_" + uid + "." + extension;
+            String videoURL = "uploads" + File.separator + "videos" +File.separator+ System.nanoTime() + "_" + loggedUserId + "." + extension;
             File f = new File(videoURL);
             if(!f.exists()){
                 Files.copy(file.getInputStream(),f.toPath());
@@ -91,7 +91,7 @@ public class VideoService extends AbstractService {
         return videoDTOS;
     }
 
-    public boolean reactToVideo(long videoId, long userId, char reaction) {
+    public String reactToVideo(long videoId, long userId, char reaction) {
         User u = getUserById(userId);
         VideoReaction videoReaction = new VideoReaction();
         VideoReactionKey videoReactionKey = new VideoReactionKey();
@@ -106,10 +106,10 @@ public class VideoService extends AbstractService {
         if (videoReactionRepository.findById(videoReactionKey).isPresent() &&
                 videoReactionRepository.findById(videoReactionKey).get().getReaction() == reaction){
             videoReactionRepository.delete(videoReaction);
-            return false;
+            return "Successfully removed reaction";
         }
         videoReactionRepository.save(videoReaction);
-        return true;
+        return "Successfully reacted to video";
     }
 
     public List<VideoResponseDTO> getAllVideosWithReaction(long id, char c) {
