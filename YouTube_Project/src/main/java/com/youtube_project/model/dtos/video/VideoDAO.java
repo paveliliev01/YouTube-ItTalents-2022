@@ -31,10 +31,10 @@ public class VideoDAO {
     public List<VideoSimpleResponseDTO> getVideosByMostWatched(int rows, int pageNumber) {
 
         String query =
-                "Select v.id,v.owner_id AS owner,v.title,v.video_url,v.date_of_upload, u.first_name,u.last_name,u.profile_photo,number_of_likes,views from videos AS v LEFT join (select video_id,count(*) as number_of_likes from videos_have_reactions where reaction like 'l' group by video_id)\n" +
-                        "as likes on likes.video_id = v.id\n" +
+                "SELECT v.id,v.owner_id AS owner,v.title,v.video_url,v.date_of_upload, u.first_name,u.last_name,u.profile_photo,number_of_likes,views FROM videos AS v LEFT join (select video_id,count(*) AS number_of_likes FROM videos_have_reactions WHERE reaction LIKE 'l' GROUP BY video_id)\n" +
+                        "AS likes ON likes.video_id = v.id\n" +
                         "LEFT JOIN users AS u ON u.id = v.owner_id\n" +
-                        "LEFT JOIN (select video_id,COUNT(*) as views FROM users_watched_videos GROUP by video_id ) AS views ON v.id = views.video_id WHERE v.is_private = 0 AND u.is_deleted = 0 GROUP BY  v.id ORDER BY views DESC LIMIT " + pageNumber + ", " + (rows + (pageNumber * 2));
+                        "LEFT JOIN (select video_id,COUNT(*) AS views FROM users_watched_videos GROUP BY video_id ) AS views ON v.id = views.video_id WHERE v.is_private = 0 AND u.is_deleted = 0 GROUP BY  v.id ORDER BY views DESC LIMIT " + pageNumber + ", " + (rows + (pageNumber * 2));
 
 
         return getVideoSimpleResponseDTOS(query, findCountOfUserUploads, queryUserIdAndNumberObservers);
@@ -43,10 +43,10 @@ public class VideoDAO {
 
     public List<VideoSimpleResponseDTO> getMostLikedVideos(int rows, int pageNumber) {
 
-        String query = "Select v.id,v.owner_id AS owner,v.title,v.video_url,v.date_of_upload, u.first_name,u.last_name,u.profile_photo,number_of_likes,views from videos AS v LEFT join (select video_id,count(*) as number_of_likes from videos_have_reactions where reaction like 'l' group by video_id)\n" +
-                "as likes on likes.video_id = v.id\n" +
+        String query = "SELECT v.id,v.owner_id AS owner,v.title,v.video_url,v.date_of_upload, u.first_name,u.last_name,u.profile_photo,number_of_likes,views FROM videos AS v LEFT join (select video_id,count(*) AS number_of_likes FROM videos_have_reactions WHERE reaction LIKE 'l' GROUP BY video_id)\n" +
+                "AS likes ON likes.video_id = v.id\n" +
                 "LEFT JOIN users AS u ON u.id = v.owner_id\n" +
-                "LEFT JOIN (select video_id,COUNT(*) as views FROM users_watched_videos GROUP by video_id ) AS views ON v.id = views.video_id WHERE v.is_private = 0 AND u.is_deleted = 0 GROUP BY  v.id ORDER BY number_of_likes DESC LIMIT " + pageNumber + ", " + (rows + (pageNumber * 2));
+                "LEFT JOIN (select video_id,COUNT(*) AS views FROM users_watched_videos GROUP by video_id ) AS views ON v.id = views.video_id WHERE v.is_private = 0 AND u.is_deleted = 0 AND  CURRENT_DATE() > CURRENT_DATE() - INTERVAL 7 DAY GROUP BY  v.id ORDER BY number_of_likes DESC LIMIT " + pageNumber + ", " + (rows + (pageNumber * 2));
 
         return getVideoSimpleResponseDTOS(query, findCountOfUserUploads, queryUserIdAndNumberObservers);
 
@@ -92,7 +92,7 @@ public class VideoDAO {
         videoSimpleResponseDTO.setUser(buildSimpleUser(resultSet));
         videoSimpleResponseDTO.setTitle(resultSet.getString("title"));
         videoSimpleResponseDTO.setVideoUrl(resultSet.getString("video_url"));
-        videoSimpleResponseDTO.setUploadDate(LocalDateTime.now());
+        videoSimpleResponseDTO.setUploadDate(resultSet.getDate("date_of_upload").toLocalDate());
         videoSimpleResponseDTO.setViews(resultSet.getInt("views"));
         videoSimpleResponseDTO.setLikes(resultSet.getLong("number_of_likes"));
         return videoSimpleResponseDTO;
