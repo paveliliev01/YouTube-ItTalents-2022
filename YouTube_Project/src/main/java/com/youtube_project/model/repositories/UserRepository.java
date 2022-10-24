@@ -1,6 +1,7 @@
 package com.youtube_project.model.repositories;
 
 import com.youtube_project.model.entities.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +14,5 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     List<User> findAllByPhoneNumber(String phoneNumber);
 
-    List<User> findAllByFirstNameAndLastName(String firstName,String lastName);
+    List<User> findAllByFirstNameAndLastName(String firstName, String lastName, Pageable pageable);
 }

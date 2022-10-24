@@ -94,7 +94,12 @@ public class PlaylistService extends AbstractService {
         Set<VideoDTO> videoDTOS = new HashSet<>();
         VideoDTO videoDTO;
 
+
+
         for (Playlist playlist1 : playlist) {
+            if(playlist1.isPrivate()){
+                continue;
+            }
             PlaylistDTO playlistDTO = mapToPlayListDTO(playlist1);
             Set<Video> videos = playlist1.getVideos();
             for (Video video : videos) {

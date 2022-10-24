@@ -2,7 +2,6 @@ package com.youtube_project.contollers;
 
 import com.youtube_project.model.dtos.user.*;
 import com.youtube_project.model.exceptions.BadRequestException;
-import com.youtube_project.model.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,8 +76,11 @@ public class UserController extends MasterController {
 
     @GetMapping("/getByName")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserResponseDTO> getAllByName(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName) {
-        return userService.getAllUsersByName(firstName, lastName);
+    public List<UserResponseDTO> getAllByName(@RequestParam("firstName") String firstName,
+                                              @RequestParam("lastName") String lastName,
+                                              @RequestParam(defaultValue = "0") int pageNumber,
+                                              @RequestParam(defaultValue = "5") int rowNumbers) {
+        return userService.getAllUsersByName(firstName, lastName, pageNumber, rowNumbers);
     }
 
     @PutMapping("/edit")
@@ -90,45 +92,46 @@ public class UserController extends MasterController {
 
     @GetMapping("/followers")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserResponseDTO> getFollowers(HttpServletRequest request){
+    public List<UserResponseDTO> getFollowers(HttpServletRequest request) {
         sessionManager.validateLogin(request);
         return userService.getFollowers(sessionManager.getSessionUserId(request));
     }
 
     @GetMapping("/subscriptions")
     @ResponseStatus(HttpStatus.OK)
-    public Set<UserResponseDTO> getSubscriptions(HttpServletRequest request){
+    public Set<UserResponseDTO> getSubscriptions(HttpServletRequest request) {
         sessionManager.validateLogin(request);
         return userService.getSubscriptions(sessionManager.getSessionUserId(request));
     }
 
     @PostMapping("/subscribe/{uid}")
     @ResponseStatus(HttpStatus.OK)
-    public String subscribeToAUser(@PathVariable long uid,HttpServletRequest request){
+    public String subscribeToAUser(@PathVariable long uid, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return userService.subscribe(uid,sessionManager.getSessionUserId(request));
+        return userService.subscribe(uid, sessionManager.getSessionUserId(request));
     }
+
     @PostMapping("/unsubscribe/{uid}")
     @ResponseStatus(HttpStatus.OK)
-    public String unSubscribeFromAUser(@PathVariable long uid,HttpServletRequest request){
+    public String unSubscribeFromAUser(@PathVariable long uid, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return userService.unsubscribe(uid,sessionManager.getSessionUserId(request));
+        return userService.unsubscribe(uid, sessionManager.getSessionUserId(request));
     }
 
-    @PostMapping("/profile_photo")
+    @PostMapping("/{uid}/profile_photo")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadProfilePhoto(@RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
+    public String uploadProfilePhoto(@PathVariable(value = "uid") long uid, @RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        long loggedUserId = sessionManager.getSessionUserId(request);
-        return userService.uploadProfilePhoto(photo,loggedUserId);
+        sessionManager.checkIfAuthorized(uid, request);
+        return userService.uploadProfilePhoto(photo, uid);
     }
 
-    @PostMapping("/background_photo")
+    @PostMapping("/{uid}/background_photo")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadBackgroundPhoto(@RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request){
+    public String uploadBackgroundPhoto(@PathVariable(value = "uid") long uid, @RequestParam(value = "photo") MultipartFile photo, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        long loggedUseId = sessionManager.getSessionUserId(request);
-        return userService.uploadBackgroundPhoto(photo,loggedUseId);
+        sessionManager.checkIfAuthorized(uid, request);
+        return userService.uploadBackgroundPhoto(photo, uid);
     }
 
 }
