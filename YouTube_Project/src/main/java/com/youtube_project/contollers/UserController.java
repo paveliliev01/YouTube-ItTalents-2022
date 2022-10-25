@@ -25,6 +25,12 @@ public class UserController extends MasterController {
         return userService.register(userDTO);
     }
 
+    @GetMapping("/verify_registration/{encryptedId}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO verifyRegistration(@PathVariable String encryptedId) {
+        return userService.verifyRegistration(encryptedId);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.FOUND)
     public UserResponseDTO getUserById(@PathVariable long id) {

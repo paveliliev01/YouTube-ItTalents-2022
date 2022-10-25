@@ -10,6 +10,8 @@ import com.youtube_project.model.relationships.videoreactions.VideoReactionRepos
 import com.youtube_project.model.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -35,6 +37,8 @@ public class AbstractService {
     protected CommentReactionRepository commentReactionRepository;
     @Autowired
     protected VideosInPlaylistRepository videosInPlaylistRepository;
+    @Autowired
+    protected JavaMailSender javaMailSender;
 
     public static final char LIKE = 'l';
     public static final char DISLIKE = 'd';

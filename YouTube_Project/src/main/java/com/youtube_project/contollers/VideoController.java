@@ -80,5 +80,11 @@ public class VideoController extends MasterController{
         long loggedUserId = sessionManager.getSessionUserId(request);
         return videoService.delete(vid,loggedUserId);
     }
+/*    @GetMapping("/{uid}/uploads")
+    public List<VideoResponseDTO> getUserUploads(HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return videoService.getUploads(loggedUserId);
+    }*/
 
 }

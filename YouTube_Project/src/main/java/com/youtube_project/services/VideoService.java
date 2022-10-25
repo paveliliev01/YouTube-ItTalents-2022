@@ -143,4 +143,8 @@ public class VideoService extends AbstractService {
         videoRepository.delete(video);
         return "Video has been deleted successfully";
     }
+
+ /*   public List<VideoResponseDTO> getUploads(long loggedUserId) {
+        return videoRepository.findAllByOwner(loggedUserId);
+    }*/
 }

@@ -11,6 +11,5 @@ import java.util.Set;
 public interface VideoRepository extends JpaRepository<Video,Long> {
 
     List<Video> findAllByTitle(String title);
-
-
+    List<Video> findAllByOwner(long id);
 }
