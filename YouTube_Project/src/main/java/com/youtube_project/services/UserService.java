@@ -7,7 +7,8 @@ import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,10 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +34,6 @@ public class UserService extends AbstractService {
     public static final int USER_ADDITIONAL_INFO_MAX_LENGTH = 2000;
     public static final int TOTAL_VALID_NUMBER_OF_ROLES = 2; // number of existing roles in DB (consecutive numbers)
     public static final int TOTAL_VALID_NUMBER_OF_GENDERS = 3; // number of existing genders in DB (consecutive numbers)
-    public static final String SENDER = "marteen93@abv.bg";
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -53,44 +50,8 @@ public class UserService extends AbstractService {
         u.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         u.setDateOfBirth(LocalDate.parse(userDTO.getDateOfBirth()));
         userRepository.save(u);
-
-        String token =System.nanoTime() + "$$$" + (new Random().nextInt(99999) + 11111) + "*=3214@" + u.getId() + "@" + System.nanoTime();
-        sendEmail(u, token);
-        
         return modelMapper.map(u, UserResponseDTO.class);
     }
-
-    private void sendEmail(User user,String token) {
-        new Thread(() -> {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setFrom(SENDER);
-            msg.setTo(user.getEmail());
-            msg.setSubject("Verify account");
-            msg.setText("You have to verify tour account.\nPlease follow this link: http://localhost:9301/users/verify_registration/"+ token);
-            javaMailSender.send(msg);
-        }).start();
-    }
-
-    public UserResponseDTO verifyRegistration(String encryptedId) {
-        int id = 0;
-        Pattern pattern = Pattern.compile("(?<=@)(.*?)(?=@)");
-        Matcher matcher = pattern.matcher(encryptedId);
-        if (matcher.find()) {
-            id = Integer.parseInt(matcher.group(1));
-        }
-        User user = getUserById(id);
-        user.setVerified(true);
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom(SENDER);
-        msg.setTo(user.getEmail());
-        msg.setSubject("Verified");
-        msg.setText("You have verified your account");
-        javaMailSender.send(msg);
-        userRepository.save(user);
-
-        return modelMapper.map(user,UserResponseDTO.class);
-    }
-
     public UserResponseDTO getUserDTOById(long id) {
         User u = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -142,8 +103,9 @@ public class UserService extends AbstractService {
         return users.stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
     }
 
-    public List<UserResponseDTO> getAllUsersByName(String firstName, String lastName) {
-        return userRepository.findAllByFirstNameAndLastName(firstName, lastName).stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
+    public List<UserResponseDTO> getAllUsersByName(String firstName, String lastName, int pageNumber, int rowNumbers) {
+        Pageable page = PageRequest.of(pageNumber,rowNumbers);
+        return userRepository.findAllByFirstNameAndLastName(firstName, lastName,page).stream().map(u -> modelMapper.map(u, UserResponseDTO.class)).collect(Collectors.toList());
     }
 
     public boolean deleteUserAccount(long id) {
@@ -301,10 +263,10 @@ public class UserService extends AbstractService {
         return "Unsubscribed from " + userToSubscribeTo.getFirstName();
     }
 
-    public String uploadProfilePhoto(MultipartFile photo, long loggedUserId) {
-            User user = getUserById(loggedUserId);
+    public String uploadProfilePhoto(MultipartFile photo, long uid) {
+            User user = getUserById(uid);
             String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-            String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + loggedUserId + "." + extension;
+            String fileURL = "uploads" + File.separator + "profile_pictures" +File.separator+ "profile_photo_user" + "_" + uid + "." + extension;
 
             saveAndReplacePhotoLocally(photo,fileURL,user);
 
@@ -314,10 +276,10 @@ public class UserService extends AbstractService {
             return "Successfully uploaded " + photo.getName();
     }
 
-    public String uploadBackgroundPhoto(MultipartFile photo, long loggedUseId) {
-        User user = getUserById(loggedUseId);
+    public String uploadBackgroundPhoto(MultipartFile photo, long uid) {
+        User user = getUserById(uid);
         String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-        String fileURL = "uploads" + File.separator + "background_pictures" +File.separator+ "background_picture_user" + "_" + loggedUseId + "." + extension;
+        String fileURL = "uploads" + File.separator + "background_pictures" +File.separator+ "background_picture_user" + "_" + uid + "." + extension;
 
         saveAndReplacePhotoLocally(photo,fileURL,user);
 

@@ -6,11 +6,13 @@ import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
+import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
 import com.youtube_project.model.relationships.videoreactions.VideoReaction;
 import com.youtube_project.model.relationships.videoreactions.VideoReactionKey;
 import com.youtube_project.model.entities.User;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +29,9 @@ public class VideoService extends AbstractService {
 
     public static final int MAX_TITLE_LENGTH = 100;
     public static final int MAX_DESCRIPTION_LENGTH = 200;
+
+    @Autowired
+    VideoDAO videoDAO;
 
     public VideoResponseDTO getById(long id){
         Video v = getVideoById(id);
@@ -142,6 +147,30 @@ public class VideoService extends AbstractService {
         f.delete();
         videoRepository.delete(video);
         return "Video has been deleted successfully";
+    }
+
+    public List<VideoSimpleResponseDTO> getMostWatched(int rows, int pageNumber) {
+        if (pageNumber >= 0 && rows > 0) {
+            List<VideoSimpleResponseDTO> videos = videoDAO.getVideosByMostWatched(rows, pageNumber);
+            if (videos.isEmpty()) {
+                throw new NotFoundException("No videos on this page");
+            }
+            return videos;
+        } else {
+            throw new BadRequestException("Invalid parameters");
+        }
+    }
+
+    public List<VideoSimpleResponseDTO> getMostLiked(int rows, int pageNumber) {
+        if (pageNumber >= 0 && rows > 0) {
+            List<VideoSimpleResponseDTO> videos = videoDAO.getMostLikedVideos(rows, pageNumber);
+            if (videos.isEmpty()) {
+                throw new NotFoundException("No videos on this page");
+            }
+            return videos;
+        } else {
+            throw new BadRequestException("Invalid parameters");
+        }
     }
 
  /*   public List<VideoResponseDTO> getUploads(long loggedUserId) {
