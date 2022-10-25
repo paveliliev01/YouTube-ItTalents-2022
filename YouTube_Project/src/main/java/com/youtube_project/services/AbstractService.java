@@ -70,6 +70,11 @@ public class AbstractService {
         return categoryRepository.findByName(name).orElseThrow(() -> new NotFoundException("Category not found!"));
     }
 
+    protected User getUserByEmail(String email){
+        return userRepository.findUserByEmail(email).orElseThrow(() -> new NotFoundException("Incorrect e-mail!"));
+    }
+
+
     protected VideoResponseDTO videoToResponseVideoDTO(Video v) {
         VideoResponseDTO vDTO = modelMapper.map(v,VideoResponseDTO.class);
         vDTO.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));

@@ -99,4 +99,12 @@ public class VideoController extends MasterController{
             @RequestParam(defaultValue = "5") int rowNumbers) {
         return videoService.getMostLiked(rowNumbers, pageNumber);
     }
+
+    @PutMapping("/clear_viewed_history")
+    public String deleteViewHistory(HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        videoService.deleteViewHistory(loggedUserId);
+        return null;
+    }
 }

@@ -3,6 +3,7 @@ package com.youtube_project.contollers;
 import com.youtube_project.model.dtos.user.*;
 import com.youtube_project.model.exceptions.BadRequestException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -138,6 +139,20 @@ public class UserController extends MasterController {
         sessionManager.validateLogin(request);
         long loggedUseId = sessionManager.getSessionUserId(request);
         return userService.uploadBackgroundPhoto(photo,loggedUseId);
+    }
+
+    @PutMapping("/forgotten_password")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<String> forgottenPassword(@RequestParam(value = "email") String email, HttpServletRequest request){
+        return userService.forgottenPassword(email);
+    }
+
+    @PutMapping("/change_password")
+    @ResponseStatus(HttpStatus.OK)
+    public String changePassword(@RequestBody UserChangePasswordDTO dto, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return userService.changePassword(dto,loggedUserId);
     }
 
 }

@@ -1,5 +1,8 @@
 package com.youtube_project.services;
 
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.rest.lookups.v1.PhoneNumber;
 import com.youtube_project.model.dtos.user.*;
 import com.youtube_project.model.entities.User;
 import com.youtube_project.model.exceptions.BadRequestException;
@@ -9,6 +12,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +32,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
+
 @Service
 public class UserService extends AbstractService {
 
@@ -38,6 +45,10 @@ public class UserService extends AbstractService {
     public static final int USER_ADDITIONAL_INFO_MAX_LENGTH = 2000;
     public static final int TOTAL_VALID_NUMBER_OF_ROLES = 2; // number of existing roles in DB (consecutive numbers)
     public static final int TOTAL_VALID_NUMBER_OF_GENDERS = 3; // number of existing genders in DB (consecutive numbers)
+    public static final String SENDER = "marteeen93@gmail.com";
+    public static final int LENGTH = 10;
+    public static final String ACCOUNT_SID = System.getenv("TWILIO_ACCOUNT_SID");
+    public static final String AUTH_TOKEN = System.getenv("TWILIO_AUTH_TOKEN");
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -61,7 +72,7 @@ public class UserService extends AbstractService {
     }
 
     private void sendEmail(User user) {
-        String token = System.currentTimeMillis() + "$$$" + (new Random().nextInt(99999) + 11111) + "*=3214@" + user.getId() + "@" + System.currentTimeMillis();
+        String token = System.currentTimeMillis() + "$$$" + new Random().nextInt(99999) + "*=3214@" + user.getId() + "@" + System.currentTimeMillis();
 
         new Thread(() -> {
             SimpleMailMessage msg = new SimpleMailMessage();
@@ -339,7 +350,7 @@ public class UserService extends AbstractService {
         User user = getUserById(id);
         user.setVerified(true);
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom("marteeen93@gmail.com");
+        msg.setFrom(SENDER);
         msg.setTo(user.getEmail());
         msg.setSubject("Verified");
         msg.setText("You have verified your account");
@@ -347,5 +358,46 @@ public class UserService extends AbstractService {
         userRepository.save(user);
 
         return modelMapper.map(user,UserResponseDTO.class);
+    }
+    public ResponseEntity<String> forgottenPassword(String email) {
+        User user = getUserByEmail(email);
+        String newPassword = generateNewPassword(LENGTH);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return sendSMSWithNewPassword(user);
+    }
+
+    private ResponseEntity<String> sendSMSWithNewPassword(User user) {
+
+        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+
+        Message.creator(new com.twilio.type.PhoneNumber("+359 895979840"),
+                new com.twilio.type.PhoneNumber("+17432093191"), "Your new password is : " + user.getPassword()).create();
+
+        return new ResponseEntity<>("Message sent successfully", HttpStatus.OK);
+    }
+
+    private String generateNewPassword(int length) {
+        String password = new Random().ints(length, 33, 122).collect(StringBuilder::new,
+                        StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+        return password;
+    }
+
+    public String changePassword(UserChangePasswordDTO dto, long loggedUserId) {
+        User user = getUserById(loggedUserId);
+        if(!passwordEncoder.matches(dto.getCurrentPassword(),user.getPassword())){
+            throw new BadRequestException("Password mismatch!");
+        }
+        if(!dto.getPasswordNew().equals(dto.getPasswordNewConfirm())){
+            throw new BadRequestException("Password mismatch!");
+        }
+        if (!dto.getPasswordNew().matches(VALID_PASSWORD_REGEX)) {
+            throw new BadRequestException("Invalid password!");
+        }
+        user.setPassword(passwordEncoder.encode(dto.getPasswordNew()));
+        userRepository.save(user);
+        System.out.println(user.getPassword());
+        return "Password changed successfully!";
     }
 }

@@ -177,4 +177,11 @@ public class VideoService extends AbstractService {
         List<VideoResponseDTO> videosDto = videos.stream().map(v -> modelMapper.map(v,VideoResponseDTO.class)).collect(Collectors.toList());
         return videosDto;
     }
+
+    public String deleteViewHistory(long loggedUserId) {
+        User user = getUserById(loggedUserId);
+        user.getWatchedVideos().clear();
+        userRepository.save(user);
+        return "History deleted";
+    }
 }
