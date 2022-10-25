@@ -1,5 +1,6 @@
 package com.youtube_project.model.repositories;
 
+import com.youtube_project.model.entities.User;
 import com.youtube_project.model.entities.Video;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,5 +12,5 @@ import java.util.Set;
 public interface VideoRepository extends JpaRepository<Video,Long> {
 
     List<Video> findAllByTitle(String title);
-    List<Video> findAllByOwner(long id);
+    List<Video> findAllByOwner(User user);
 }

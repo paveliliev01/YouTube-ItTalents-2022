@@ -1,9 +1,7 @@
 package com.youtube_project.services;
 
 import com.youtube_project.model.dtos.user.UserResponseDTO;
-import com.youtube_project.model.dtos.video.VideoDTO;
-import com.youtube_project.model.dtos.video.VideoResponseDTO;
-import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
+import com.youtube_project.model.dtos.video.*;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.NotFoundException;
@@ -173,7 +171,10 @@ public class VideoService extends AbstractService {
         }
     }
 
- /*   public List<VideoResponseDTO> getUploads(long loggedUserId) {
-        return videoRepository.findAllByOwner(loggedUserId);
-    }*/
+    public List<VideoResponseDTO> getUploads(long uid) {
+        User user = getUserById(uid);
+        List<Video> videos = videoRepository.findAllByOwner(user);
+        List<VideoResponseDTO> videosDto = videos.stream().map(v -> modelMapper.map(v,VideoResponseDTO.class)).collect(Collectors.toList());
+        return videosDto;
+    }
 }
