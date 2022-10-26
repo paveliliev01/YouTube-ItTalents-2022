@@ -2,6 +2,7 @@ package com.youtube_project.model.dtos.playlist;
 
 import com.youtube_project.model.dtos.user.UserResponseDTO;
 import com.youtube_project.model.dtos.video.VideoDTO;
+import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import lombok.Data;
 
 import java.util.Set;
@@ -12,5 +13,5 @@ public class PlaylistDTO {
     private String name;
     private boolean isPrivate;
     private UserResponseDTO userResponseDTO;
-    private Set<VideoDTO> videos;
+    private Set<VideoResponseDTO> videos;
 }
