@@ -22,10 +22,9 @@ public class CommentController extends MasterController {
 
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> deleteCommentById(@RequestParam long vid,@RequestParam int cid, HttpServletRequest request){
+    public String deleteCommentById(@RequestParam long vid,@RequestParam int cid, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        commentService.deleteById(vid,cid,sessionManager.getSessionUserId(request));
-        return ResponseEntity.status(204).body("Comment deleted successfully!");
+        return commentService.deleteById(vid,cid,sessionManager.getSessionUserId(request));
     }
 
     @GetMapping("/{cid}")
@@ -37,18 +36,18 @@ public class CommentController extends MasterController {
         return commentService.getAllCommentsOfVideo(vid);
     }
 
-    @PostMapping("/like/{cid}")
+    @PostMapping("video/{vid}/like/{cid}")
     @ResponseStatus(HttpStatus.OK)
-    public boolean likeComment(@PathVariable long cid,HttpServletRequest request){
+    public String likeComment(@PathVariable long vid,@PathVariable long cid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),LIKE);
+        return commentService.reactToComment(vid,cid,sessionManager.getSessionUserId(request),LIKE);
     }
 
-    @PostMapping("dislike/{cid}")
+    @PostMapping("video/{vid}/dislike/{cid}")
     @ResponseStatus(HttpStatus.OK)
-    public boolean dislikeComment(@PathVariable long cid,HttpServletRequest request){
+    public String dislikeComment(@PathVariable long vid,@PathVariable long cid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),DISLIKE);
+        return commentService.reactToComment(vid,cid,sessionManager.getSessionUserId(request),DISLIKE);
     }
 
     @PostMapping("/reply/{cid}")

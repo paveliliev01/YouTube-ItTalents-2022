@@ -59,7 +59,7 @@ public class CommentService extends AbstractService {
         return commentResponseDTO;
     }
 
-    public List<CommentResponseDTO> getAllCommentsOfVideo(long vid){
+    public List<CommentResponseDTO> getAllCommentsOfVideo(long vid) {
         List<Comment> commentsOfVideo = getVideoById(vid).getComments();
         List<CommentResponseDTO> commentDTOS = new ArrayList<>();
         for (Comment comment : commentsOfVideo) {
@@ -70,21 +70,41 @@ public class CommentService extends AbstractService {
     }
 
     @Transactional(rollbackForClassName = "SQLException.class")
-    public void deleteById(long vid,long cid, long uid) {
+    public String deleteById(long vid, long cid, long uid) {
         Video video = getVideoById(vid);
         Comment comment = getCommentById(cid);
-        if (comment.getOwner().getId() != uid){
+
+        if (video.getOwner().getId() == uid) {
+            deleteCommentAndSubComments(cid, video, comment);
+        }
+
+        if (comment.getOwner().getId() != uid) {
             throw new UnauthorizedException("This is not your comment to delete!");
         }
-        if (!video.getComments().contains(comment)){
-            throw new BadRequestException("The comment you are trying to delete doesn't exist");
+        if (comment.getVideo().getId() != vid) {
+            throw new BadRequestException("The comment you are trying to delete doesn't correspond to this video!");
         }
-        commentRepository.deleteById(cid);
+        return deleteCommentAndSubComments(cid, video, comment);
     }
 
-    public boolean reactToComment(long cid, long uid,char reaction){
+    private String deleteCommentAndSubComments(long cid, Video video, Comment comment) {
+        if (!video.getComments().contains(comment)) {
+            throw new BadRequestException("The comment you are trying to delete doesn't exist");
+        }
+
+        List<Comment> comments = comment.getSubComments();
+        for (Comment comment1 : comments) {
+            commentRepository.deleteById(comment1.getId());
+        }
+        commentRepository.deleteById(cid);
+        return "Comment successfully deleted!";
+    }
+
+    public String reactToComment(long vid, long cid, long uid, char reaction) {
         Comment comment = getCommentById(cid);
         User user = getUserById(uid);
+        Video video = getVideoById(vid);
+
         CommentReactionKey commentReactionKey = new CommentReactionKey();
         commentReactionKey.setCommentId(cid);
         commentReactionKey.setUserId(uid);
@@ -95,19 +115,23 @@ public class CommentService extends AbstractService {
         commentReaction.setUser(user);
         commentReaction.setReaction(reaction);
 
+        if (video.getId() != comment.getVideo().getId()) {
+            throw new BadRequestException("This comment doesn't belong to the video!");
+        }
+
         if (commentReactionRepository.findById(commentReactionKey).isPresent()
-                && commentReactionRepository.findById(commentReactionKey).get().getReaction() == reaction){
+                && commentReactionRepository.findById(commentReactionKey).get().getReaction() == reaction) {
             commentReactionRepository.delete(commentReaction);
-            return false;
+            return "You had already reacted to this comment!Reaction deleted!";
         }
 
         commentReactionRepository.save(commentReaction);
-        return true;
+        return "Successfully reacted to comment with id " + cid;
     }
 
     public CommentDTO replyToAComment(CommentAddDTO commentAddDTO, long cid, long uid) {
         Comment comment = getCommentById(cid);
-        Comment commentReply = modelMapper.map(commentAddDTO,Comment.class);
+        Comment commentReply = modelMapper.map(commentAddDTO, Comment.class);
 
         commentReply.setOwner(getUserById(uid));
         commentReply.setText(commentReply.getText());
@@ -121,7 +145,7 @@ public class CommentService extends AbstractService {
 
     }
 
-    private CommentDTO commentToCommentDTO(Comment comment){
+    private CommentDTO commentToCommentDTO(Comment comment) {
         CommentDTO commentDTO = new CommentDTO();
 
         commentDTO.setOwner(userToUserResponseDTO(comment.getOwner()));
@@ -129,8 +153,8 @@ public class CommentService extends AbstractService {
         commentDTO.setText(comment.getText());
         commentDTO.setDateOfCreation(comment.getDateOfCreation());
 
-        int likes = commentReactionRepository.findAllByCommentAndReaction(comment,LIKE).size();
-        int dislikes = commentReactionRepository.findAllByCommentAndReaction(comment,DISLIKE).size();
+        int likes = commentReactionRepository.findAllByCommentAndReaction(comment, LIKE).size();
+        int dislikes = commentReactionRepository.findAllByCommentAndReaction(comment, DISLIKE).size();
 
         commentDTO.setLikes(likes);
         commentDTO.setDislikes(dislikes);
