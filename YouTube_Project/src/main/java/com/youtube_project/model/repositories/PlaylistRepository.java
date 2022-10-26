@@ -1,6 +1,7 @@
 package com.youtube_project.model.repositories;
 
 import com.youtube_project.model.entities.Playlist;
+import com.youtube_project.model.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface PlaylistRepository extends JpaRepository<Playlist,Long> {
    Optional<List<Playlist>> findAllByName(String name);
+   List<Playlist> findAllByOwner(User user);
 }
