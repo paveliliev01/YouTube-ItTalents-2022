@@ -3,12 +3,13 @@ package com.youtube_project.services;
 import com.youtube_project.model.dtos.playlist.PlaylistAddDTO;
 import com.youtube_project.model.dtos.playlist.PlaylistDTO;
 import com.youtube_project.model.dtos.user.UserResponseDTO;
-import com.youtube_project.model.dtos.video.VideoDTO;
+import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.entities.Playlist;
 import com.youtube_project.model.entities.User;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.NotFoundException;
+import com.youtube_project.model.exceptions.UnauthorizedException;
 import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylist;
 import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylistKey;
 import org.springframework.stereotype.Service;
@@ -52,15 +53,10 @@ public class PlaylistService extends AbstractService {
         if (playlist.getVideos().contains(video)) {
             throw new BadRequestException("Video already exists in playlist");
         }
-
+        if (video.isPrivate()){
+            throw new UnauthorizedException("The video you want to add to this playlist is private!");
+        }
         videosInPlaylistRepository.save(getVideoInPlaylist(playlistId, videoId));
-//        Set<Playlist> playlists = user.getPlaylists();
-//        for (Playlist playlist1 : playlists) {
-//            System.out.println(playlist1.getName());
-//            for (Video video1 : playlist1.getVideos()) {
-//                System.out.println(video1.getTitle());
-//            }
-//        }
         return true;
     }
 
@@ -77,13 +73,6 @@ public class PlaylistService extends AbstractService {
         }
 
         videosInPlaylistRepository.delete(getVideoInPlaylist(playlistId, videoId));
-//        Set<Playlist> playlists = user.getPlaylists();
-//        for (Playlist playlist1 : playlists) {
-//            System.out.println(playlist1.getName());
-//            for (Video video1 : playlist1.getVideos()) {
-//                System.out.println(video1.getTitle());
-//            }
-//        }
         return true;
     }
 
@@ -91,27 +80,29 @@ public class PlaylistService extends AbstractService {
 
         List<Playlist> playlist = playlistRepository.findAllByName(name).orElseThrow(() -> new NotFoundException("Playlist not found"));
         List<PlaylistDTO> playlistDTOS = new ArrayList<>();
-        Set<VideoDTO> videoDTOS = new HashSet<>();
-        VideoDTO videoDTO;
-
-
-
+        Set<VideoResponseDTO> videoDTOS = new HashSet<>();
         for (Playlist playlist1 : playlist) {
             if(playlist1.isPrivate()){
                 continue;
             }
-            PlaylistDTO playlistDTO = mapToPlayListDTO(playlist1);
-            Set<Video> videos = playlist1.getVideos();
-            for (Video video : videos) {
-                videoDTO = modelMapper.map(video, VideoDTO.class);
-                UserResponseDTO u = userToUserResponseDTO(video.getOwner());
-                videoDTO.setOwner(u);
-                videoDTOS.add(videoDTO);
-            }
-            playlistDTO.setVideos(videoDTOS);
-            playlistDTOS.add(playlistDTO);
+            getPlaylist(playlistDTOS, videoDTOS, playlist1);
         }
         return playlistDTOS;
+    }
+
+    private void getPlaylist(List<PlaylistDTO> playlistDTOS, Set<VideoResponseDTO> videoDTOS, Playlist playlist1) {
+        PlaylistDTO playlistDTO = mapToPlayListDTO(playlist1);
+        Set<Video> videos = playlist1.getVideos();
+        for (Video video : videos) {
+            if (video.isPrivate()){
+                videos.remove(video);
+                playlistRepository.save(playlist1);
+                continue;
+            }
+            videoDTOS.add(videoToResponseVideoDTO(video));
+        }
+        playlistDTO.setVideos(videoDTOS);
+        playlistDTOS.add(playlistDTO);
     }
 
     public String deletePlaylist(long playlistId, long uid) {
@@ -143,6 +134,16 @@ public class PlaylistService extends AbstractService {
         videosInPlaylist.setDateOfAdding(LocalDateTime.now());
 
         return videosInPlaylist;
+    }
+
+    public List<PlaylistDTO> getAllMyPlaylists(long uid){
+        List<Playlist> playlist = playlistRepository.findAllByOwner(getUserById(uid));
+        List<PlaylistDTO> playlistDTOS = new ArrayList<>();
+        Set<VideoResponseDTO> videoDTOS = new HashSet<>();
+        for (Playlist playlist1 : playlist) {
+            getPlaylist(playlistDTOS, videoDTOS, playlist1);
+        }
+        return playlistDTOS;
     }
 
 }
