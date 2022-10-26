@@ -1,7 +1,10 @@
 package com.youtube_project.contollers;
 
 import com.youtube_project.model.exceptions.NotFoundException;
+import com.youtube_project.services.StorageService;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,16 +17,16 @@ import java.nio.file.Files;
 @RestController
 public class FileController extends MasterController{
 
+    @Autowired
+    private StorageService storageService;
     @GetMapping("videos/download/{fileName}")
     @SneakyThrows
-    public void download(@PathVariable String fileName, HttpServletRequest req, HttpServletResponse resp){
+    public ByteArrayResource download(@PathVariable String fileName, HttpServletRequest req, HttpServletResponse resp, String bucketName){
         sessionManager.validateLogin(req);
         String filePath = "uploads" + File.separator + "videos" + File.separator + fileName;
-        File f = new File(filePath);
-        if(!f.exists()){
-            throw new NotFoundException("File not found!");
-        }
-        resp.setContentType(Files.probeContentType(f.toPath()));
-        Files.copy(f.toPath(),resp.getOutputStream());
+        byte[] f = storageService.downloadFile(filePath,bucketName);
+        ByteArrayResource resource = new ByteArrayResource(f);
+
+        return resource;
     }
 }
