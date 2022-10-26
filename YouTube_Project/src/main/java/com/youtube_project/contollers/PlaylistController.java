@@ -46,5 +46,12 @@ public class PlaylistController extends MasterController{
         return playlistService.deletePlaylist(playlistId, sessionManager.getSessionUserId(request));
     }
 
+    @GetMapping("/userplaylists")
+    @ResponseStatus(HttpStatus.OK)
+    public List<PlaylistDTO> getAllMyPlaylists(HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return playlistService.getAllMyPlaylists(sessionManager.getSessionUserId(request));
+    }
+
 
 }
