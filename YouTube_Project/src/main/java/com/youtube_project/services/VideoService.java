@@ -110,7 +110,6 @@ public class VideoService extends AbstractService {
 
     public List<VideoResponseDTO> getByTitle(String title, int pageNumber, int rowNumbers) {
         Pageable page = PageRequest.of(pageNumber, rowNumbers);
-
         return videoRepository.findAllByTitle(title,page).stream().map(this::videoToResponseVideoDTO).collect(Collectors.toList());
     }
 

@@ -1,6 +1,8 @@
 package com.youtube_project.contollers;
 
 import com.youtube_project.model.dtos.user.*;
+import com.youtube_project.model.dtos.video.VideoResponseDTO;
+import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -154,5 +156,6 @@ public class UserController extends MasterController {
         long loggedUserId = sessionManager.getSessionUserId(request);
         return userService.changePassword(dto,loggedUserId);
     }
+
 
 }

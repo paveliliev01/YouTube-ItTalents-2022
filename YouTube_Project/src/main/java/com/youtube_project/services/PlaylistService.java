@@ -12,8 +12,11 @@ import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.exceptions.UnauthorizedException;
 import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylist;
 import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylistKey;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.print.attribute.standard.PageRanges;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -76,9 +79,8 @@ public class PlaylistService extends AbstractService {
         return true;
     }
 
-    public List<PlaylistDTO> getPlaylistByName(String name) {
-
-        List<Playlist> playlist = playlistRepository.findAllByName(name).orElseThrow(() -> new NotFoundException("Playlist not found"));
+    public List<PlaylistDTO> getPlaylistByName(String name, Pageable page) {
+        List<Playlist> playlist = playlistRepository.findAllByName(name,page);
         List<PlaylistDTO> playlistDTOS = new ArrayList<>();
         Set<VideoResponseDTO> videoDTOS = new HashSet<>();
         for (Playlist playlist1 : playlist) {

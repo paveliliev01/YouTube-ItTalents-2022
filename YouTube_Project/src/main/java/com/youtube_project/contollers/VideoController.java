@@ -2,6 +2,7 @@ package com.youtube_project.contollers;
 
 import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoSimpleResponseDTO;
+import com.youtube_project.model.entities.Video;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,11 +33,11 @@ public class VideoController extends MasterController {
         return videoService.getById(vid);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/searchBy")
     @ResponseStatus(HttpStatus.FOUND)
     public List<VideoResponseDTO> getByTitle(@RequestParam(value = "title") String title,
-                                             @RequestParam(defaultValue = "0") int pageNumber,
-                                             @RequestParam(defaultValue = "1") int rowNumbers)
+                                  @RequestParam(defaultValue = "0") int pageNumber,
+                                  @RequestParam(defaultValue = "1") int rowNumbers)
     {
         return videoService.getByTitle(title,pageNumber,rowNumbers);
     }

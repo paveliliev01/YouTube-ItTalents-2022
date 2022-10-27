@@ -2,6 +2,8 @@ package com.youtube_project.contollers;
 
 import com.youtube_project.model.dtos.playlist.PlaylistAddDTO;
 import com.youtube_project.model.dtos.playlist.PlaylistDTO;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,8 +37,11 @@ public class PlaylistController extends MasterController{
 
     @GetMapping("/getByName")
     @ResponseStatus(HttpStatus.OK)
-    public List<PlaylistDTO> getAllByName(@RequestParam("name") String name) {
-        return playlistService.getPlaylistByName(name);
+    public List<PlaylistDTO> getAllByName(@RequestParam("name") String name,
+                                          @RequestParam(defaultValue = "0") int pageNumber,
+                                          @RequestParam(defaultValue = "1") int rowNumbers) {
+        Pageable page = PageRequest.of(pageNumber,rowNumbers);
+        return playlistService.getPlaylistByName(name,page);
     }
 
     @DeleteMapping("/delete/playlist")

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
@@ -18,6 +19,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     @Query("select u from User u where u.firstName  LIKE %:firstName% and u.lastName LIKE %:lastName%")
     List<User> findAllByFirstNameAndLastName(String firstName, String lastName, Pageable pageable);
+
+    @Query("select u from User u where u.firstName  LIKE %:name% or u.lastName LIKE %:name%")
+    List<User> findAllByFullNameContaining(String name, Pageable pageable);
 
     Optional<User> findUserByEmail(String email);
 }

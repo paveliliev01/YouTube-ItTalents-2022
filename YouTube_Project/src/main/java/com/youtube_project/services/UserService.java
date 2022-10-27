@@ -87,7 +87,7 @@ public class UserService extends AbstractService {
             msg.setFrom("marteeen93@gmail.com");
             msg.setTo(user.getEmail());
             msg.setSubject("Verify account");
-            msg.setText("You have to verify tour account.\nPlease follow this link: http://localhost:3333/users/verify_registration/" + token);
+            msg.setText("You have to verify tour account.\nPlease follow this link: http://localhost:9301/users/verify_registration/" + token);
             javaMailSender.send(msg);
         }).start();
     }
@@ -372,7 +372,6 @@ public class UserService extends AbstractService {
 
     }
 
-
     public UserResponseDTO verifyRegistration(String encryptedId) {
         int id = 0;
         Pattern pattern = Pattern.compile("(?<=@)(.*?)(?=@)");
@@ -398,15 +397,15 @@ public class UserService extends AbstractService {
         String newPassword = generateNewPassword(LENGTH);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        return sendSMSWithNewPassword(user);
+        return sendSMSWithNewPassword(user,newPassword);
     }
 
-    private ResponseEntity<String> sendSMSWithNewPassword(User user) {
+    private ResponseEntity<String> sendSMSWithNewPassword(User user,String newPassword) {
 
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
 
-        Message.creator(new com.twilio.type.PhoneNumber("+359 895979840"),
-                new com.twilio.type.PhoneNumber("+17432093191"), "Your new password is : " + user.getPassword()).create();
+        Message.creator(new com.twilio.type.PhoneNumber("+359"+ user.getPhoneNumber().substring(1)),
+                new com.twilio.type.PhoneNumber("+17432093191"), "Your new password is : " + newPassword).create();
 
         return new ResponseEntity<>("Message sent successfully", HttpStatus.OK);
     }

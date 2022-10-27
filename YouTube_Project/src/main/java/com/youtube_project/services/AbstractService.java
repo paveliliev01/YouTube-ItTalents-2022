@@ -1,7 +1,9 @@
 package com.youtube_project.services;
 
+import com.youtube_project.model.dtos.SearchDTO;
 import com.youtube_project.model.dtos.user.UserResponseDTO;
 import com.youtube_project.model.dtos.video.VideoResponseDTO;
+import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.*;
 import com.youtube_project.model.exceptions.NotFoundException;
 import com.youtube_project.model.relationships.commentsreactions.CommentReactionRepository;
@@ -10,11 +12,15 @@ import com.youtube_project.model.relationships.videoreactions.VideoReactionRepos
 import com.youtube_project.model.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AbstractService {
@@ -73,7 +79,6 @@ public class AbstractService {
     protected User getUserByEmail(String email){
         return userRepository.findUserByEmail(email).orElseThrow(() -> new NotFoundException("Incorrect e-mail!"));
     }
-
 
     protected VideoResponseDTO videoToResponseVideoDTO(Video v) {
         VideoResponseDTO vDTO = modelMapper.map(v,VideoResponseDTO.class);
