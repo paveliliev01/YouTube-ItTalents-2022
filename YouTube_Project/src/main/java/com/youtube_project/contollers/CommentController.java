@@ -13,13 +13,6 @@ import java.util.List;
 public class CommentController extends MasterController {
 
 
-    @PostMapping("/{vid}/add")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CommentDTO addComment(@RequestBody CommentAddDTO comment, @PathVariable long vid, HttpServletRequest request) {
-        sessionManager.validateLogin(request);
-        return commentService.addComment(comment,vid,sessionManager.getSessionUserId(request));
-    }
-
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.OK)
     public String deleteCommentById(@RequestParam long vid,@RequestParam int cid, HttpServletRequest request){
@@ -31,26 +24,26 @@ public class CommentController extends MasterController {
     public CommentDTO getCommentById(@PathVariable long cid) {
         return commentService.getById(cid);
     }
-    @GetMapping("/{vid}/all")
+    @GetMapping("all/video/{vid}")
     public List<CommentResponseDTO> getAllCommentsOfVideo(@PathVariable long vid){
         return commentService.getAllCommentsOfVideo(vid);
     }
 
-    @PostMapping("video/{vid}/like/{cid}")
+    @PostMapping("{cid}/like")
     @ResponseStatus(HttpStatus.OK)
-    public String likeComment(@PathVariable long vid,@PathVariable long cid,HttpServletRequest request){
+    public String likeComment(@PathVariable long cid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return commentService.reactToComment(vid,cid,sessionManager.getSessionUserId(request),LIKE);
+        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),LIKE);
     }
 
-    @PostMapping("video/{vid}/dislike/{cid}")
+    @PostMapping("{cid}/dislike")
     @ResponseStatus(HttpStatus.OK)
-    public String dislikeComment(@PathVariable long vid,@PathVariable long cid,HttpServletRequest request){
+    public String dislikeComment(@PathVariable long cid,HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return commentService.reactToComment(vid,cid,sessionManager.getSessionUserId(request),DISLIKE);
+        return commentService.reactToComment(cid,sessionManager.getSessionUserId(request),DISLIKE);
     }
 
-    @PostMapping("/reply/{cid}")
+    @PostMapping("{cid}/reply")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDTO replyToAComment(@RequestBody CommentAddDTO commentDTO,@PathVariable long cid,HttpServletRequest request){
         sessionManager.validateLogin(request);
