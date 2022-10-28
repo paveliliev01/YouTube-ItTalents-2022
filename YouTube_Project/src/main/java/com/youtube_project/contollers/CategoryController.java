@@ -15,14 +15,16 @@ public class CategoryController extends MasterController{
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryAddDTO createCategory(@RequestBody CategoryAddDTO categoryAdd, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return categoryService.createCategory(categoryAdd);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return categoryService.createCategory(categoryAdd,loggedUserId);
     }
 
     @PutMapping("/delete")
     @ResponseStatus(HttpStatus.OK)
     public String deleteCategory(@RequestBody CategoryAddDTO categoryDelete, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return categoryService.deleteCategory(categoryDelete);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return categoryService.deleteCategory(categoryDelete,loggedUserId);
     }
 
     @PostMapping("/follow")
@@ -41,18 +43,20 @@ public class CategoryController extends MasterController{
         return categoryService.unfollowCategory(categoryName,loggedUserId);
     }
 
-    @PostMapping("/{vid}/add")
+    @PostMapping("/add_video/{vid}")
     @ResponseStatus(HttpStatus.OK)
-    public String addVideoToCategory(@RequestParam("name") String categoryName,@PathVariable long vid, HttpServletRequest request){
+    public String addVideoToCategory(@RequestParam("category_name") String categoryName,@PathVariable long vid, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return categoryService.addVideoToCategory(categoryName,vid);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return categoryService.addVideoToCategory(categoryName,vid,loggedUserId);
     }
 
-    @PostMapping("/{vid}/remove")
+    @PostMapping("/remove_video/{vid}")
     @ResponseStatus(HttpStatus.OK)
-    public String removeVideoToCategory(@RequestParam("name") String categoryName,@PathVariable long vid, HttpServletRequest request){
+    public String removeVideoToCategory(@RequestParam("category_name") String categoryName,@PathVariable long vid, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        return categoryService.removeVideoToCategory(categoryName,vid);
+        long loggedUserId = sessionManager.getSessionUserId(request);
+        return categoryService.removeVideoToCategory(categoryName,vid,loggedUserId);
     }
 
     @GetMapping()

@@ -9,6 +9,7 @@ import com.youtube_project.model.entities.User;
 import com.youtube_project.model.entities.Video;
 import com.youtube_project.model.exceptions.BadRequestException;
 import com.youtube_project.model.exceptions.NotFoundException;
+import com.youtube_project.model.exceptions.UnauthorizedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,7 +21,9 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryService extends AbstractService{
 
-    public CategoryAddDTO createCategory(CategoryAddDTO categoryAdd) {
+    public CategoryAddDTO createCategory(CategoryAddDTO categoryAdd,long id) {
+        User u = getUserById(id);
+        checkIfAdmin(u);
         checkIfCategoryExists(categoryAdd);
         Category category = modelMapper.map(categoryAdd,Category.class);
         category.setCreationDate(LocalDate.now());
@@ -35,7 +38,9 @@ public class CategoryService extends AbstractService{
         }
     }
 
-    public String deleteCategory(CategoryAddDTO categoryDelete) {
+    public String deleteCategory(CategoryAddDTO categoryDelete,long id) {
+        User u = getUserById(id);
+        checkIfAdmin(u);
         Optional<Category> category = getCategoryByNameOptional(categoryDelete.getName());
         if(!category.isPresent()){
             throw new NotFoundException("Category with such name doesn't exist");
@@ -72,7 +77,9 @@ public class CategoryService extends AbstractService{
         }
     }
 
-    public String addVideoToCategory(String categoryName, long vid) {
+    public String addVideoToCategory(String categoryName, long vid,long id) {
+        User u = getUserById(id);
+        checkIfAdmin(u);
         Video video = getVideoById(vid);
         Category category = getCategoryByName(categoryName);
         if(!video.getCategoriesContainingVideo().contains(category)){
@@ -85,7 +92,9 @@ public class CategoryService extends AbstractService{
         }
     }
 
-    public String removeVideoToCategory(String categoryName, long vid) {
+    public String removeVideoToCategory(String categoryName, long vid,long id) {
+        User u = getUserById(id);
+        checkIfAdmin(u);
         Video video = getVideoById(vid);
         Category category = getCategoryByName(categoryName);
         if(video.getCategoriesContainingVideo().contains(category)){

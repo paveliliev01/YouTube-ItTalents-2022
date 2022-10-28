@@ -70,7 +70,7 @@ public class VideoController extends MasterController {
         return videoService.getAllVideosWithReaction(loggedUserId, DISLIKE);
     }
 
-    @PostMapping("/{vid}/watch")
+    @GetMapping("/{vid}/watch")
     public VideoResponseDTO watchVideo(@PathVariable long vid, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         long loggedUserId = sessionManager.getSessionUserId(request);

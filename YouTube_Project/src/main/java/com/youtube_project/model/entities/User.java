@@ -53,6 +53,8 @@ public class User {
     private String profilePhoto;
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private boolean isVerified;
+    @Column
+    private boolean isAdmin;
     @Column(name = "additional_info")
     private String additionalInfo;
     @Column

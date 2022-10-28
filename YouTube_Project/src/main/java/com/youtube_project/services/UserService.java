@@ -433,4 +433,15 @@ public class UserService extends AbstractService {
         System.out.println(user.getPassword());
         return "Password changed successfully!";
     }
+
+    public String giveAdminPrivilege(long id, long loggedUserId) {
+        User user = getUserById(loggedUserId);
+        if(!user.isAdmin()){
+            throw new UnauthorizedException("Only admin can give admin privilege!");
+        }
+        User userToBeAdmin = getUserById(id);
+        userToBeAdmin.setAdmin(true);
+        userRepository.save(userToBeAdmin);
+        return userToBeAdmin.getFirstName() + " is now admin.";
+    }
 }

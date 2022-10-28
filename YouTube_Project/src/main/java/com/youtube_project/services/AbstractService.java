@@ -6,6 +6,7 @@ import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
 import com.youtube_project.model.entities.*;
 import com.youtube_project.model.exceptions.NotFoundException;
+import com.youtube_project.model.exceptions.UnauthorizedException;
 import com.youtube_project.model.relationships.commentsreactions.CommentReactionRepository;
 import com.youtube_project.model.relationships.playlistshasvideos.VideosInPlaylistRepository;
 import com.youtube_project.model.relationships.videoreactions.VideoReactionRepository;
@@ -80,6 +81,12 @@ public class AbstractService {
         return userRepository.findUserByEmail(email).orElseThrow(() -> new NotFoundException("Incorrect e-mail!"));
     }
 
+    protected boolean checkIfAdmin(User u){
+        if(!u.isAdmin()){
+            throw new UnauthorizedException("Cannot perform this action, You're not an admin");
+        }
+        return true;
+    }
     protected VideoResponseDTO videoToResponseVideoDTO(Video v) {
         VideoResponseDTO vDTO = modelMapper.map(v,VideoResponseDTO.class);
         vDTO.setOwner(modelMapper.map(v.getOwner(), UserResponseDTO.class));
