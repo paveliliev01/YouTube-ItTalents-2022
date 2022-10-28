@@ -132,10 +132,10 @@ public class VideoService extends AbstractService {
         if (videoReactionRepository.findById(videoReactionKey).isPresent() &&
                 videoReactionRepository.findById(videoReactionKey).get().getReaction() == reaction) {
             videoReactionRepository.delete(videoReaction);
-            return "Successfully removed reaction";
+            return "Successfully removed reaction " + videoReactionRepository.findAllByVideoAndReaction(getVideoById(videoId),reaction).size();
         }
         videoReactionRepository.save(videoReaction);
-        return "Successfully reacted to video";
+        return "Successfully reacted to video " + videoReactionRepository.findAllByVideoAndReaction(getVideoById(videoId),reaction).size();
     }
 
     public List<VideoResponseDTO> getAllVideosWithReaction(long id, char c) {
