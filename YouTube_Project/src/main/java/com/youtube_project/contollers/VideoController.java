@@ -1,8 +1,9 @@
 package com.youtube_project.contollers;
 
+import com.youtube_project.model.dtos.comment.CommentAddDTO;
+import com.youtube_project.model.dtos.comment.CommentDTO;
 import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoSimpleResponseDTO;
-import com.youtube_project.model.entities.Video;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +14,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/videos")
 public class VideoController extends MasterController {
+
+    @PostMapping("/{vid}/addComment")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDTO addComment(@RequestBody CommentAddDTO comment, @PathVariable long vid, HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        return commentService.addComment(comment, vid, sessionManager.getSessionUserId(request));
+    }
 
 
     @PostMapping("/upload")
@@ -36,10 +44,9 @@ public class VideoController extends MasterController {
     @GetMapping("/searchBy")
     @ResponseStatus(HttpStatus.FOUND)
     public List<VideoResponseDTO> getByTitle(@RequestParam(value = "title") String title,
-                                  @RequestParam(defaultValue = "0") int pageNumber,
-                                  @RequestParam(defaultValue = "1") int rowNumbers)
-    {
-        return videoService.getByTitle(title,pageNumber,rowNumbers);
+                                             @RequestParam(defaultValue = "0") int pageNumber,
+                                             @RequestParam(defaultValue = "1") int rowNumbers) {
+        return videoService.getByTitle(title, pageNumber, rowNumbers);
     }
 
     @PostMapping("/{vid}/like")
@@ -72,7 +79,6 @@ public class VideoController extends MasterController {
 
     @GetMapping("/{vid}/watch")
     public VideoResponseDTO watchVideo(@PathVariable long vid, HttpServletRequest request) {
-        sessionManager.validateLogin(request);
         long loggedUserId = sessionManager.getSessionUserId(request);
         return videoService.watch(vid, loggedUserId);
     }
@@ -108,7 +114,6 @@ public class VideoController extends MasterController {
     public String deleteViewHistory(HttpServletRequest request) {
         sessionManager.validateLogin(request);
         long loggedUserId = sessionManager.getSessionUserId(request);
-        videoService.deleteViewHistory(loggedUserId);
-        return null;
+        return videoService.deleteViewHistory(loggedUserId);
     }
 }
