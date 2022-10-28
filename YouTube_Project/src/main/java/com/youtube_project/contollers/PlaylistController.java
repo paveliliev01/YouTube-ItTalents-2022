@@ -23,7 +23,7 @@ public class PlaylistController extends MasterController{
 
     @PostMapping("/add/video")
     @ResponseStatus(HttpStatus.OK)
-    public boolean addVideoToPlaylist(@RequestParam long playlistId,@RequestParam long videoId,HttpServletRequest request){
+    public String addVideoToPlaylist(@RequestParam long playlistId,@RequestParam long videoId,HttpServletRequest request){
         sessionManager.validateLogin(request);
         return playlistService.addVideoToPlaylist(playlistId,videoId, sessionManager.getSessionUserId(request));
     }

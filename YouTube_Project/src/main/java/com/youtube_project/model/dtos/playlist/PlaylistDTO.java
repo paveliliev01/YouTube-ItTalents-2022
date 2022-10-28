@@ -12,6 +12,6 @@ public class PlaylistDTO {
     private long id;
     private String name;
     private boolean isPrivate;
-    private UserResponseDTO userResponseDTO;
+    private UserResponseDTO owner;
     private Set<VideoResponseDTO> videos;
 }

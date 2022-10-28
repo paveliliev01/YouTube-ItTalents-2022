@@ -38,7 +38,7 @@ public class PlaylistService extends AbstractService {
 
     private PlaylistDTO mapToPlayListDTO(Playlist playlist) {
         PlaylistDTO playlistDTO = new PlaylistDTO();
-        playlistDTO.setUserResponseDTO(modelMapper.map(playlist.getOwner(), UserResponseDTO.class));
+        playlistDTO.setOwner(modelMapper.map(playlist.getOwner(), UserResponseDTO.class));
         playlistDTO.setName(playlist.getName());
         playlistDTO.setId(playlist.getId());
 
@@ -46,7 +46,7 @@ public class PlaylistService extends AbstractService {
         return playlistDTO;
     }
 
-    public boolean addVideoToPlaylist(long playlistId, long videoId, long uid) {
+    public String addVideoToPlaylist(long playlistId, long videoId, long uid) {
         Playlist playlist = getPlaylistById(playlistId);
         Video video = getVideoById(videoId);
         User user = getUserById(uid);
@@ -60,7 +60,7 @@ public class PlaylistService extends AbstractService {
             throw new UnauthorizedException("The video you want to add to this playlist is private!");
         }
         videosInPlaylistRepository.save(getVideoInPlaylist(playlistId, videoId));
-        return true;
+        return "Video " + video.getTitle() + " has been added to " + playlist.getName();
     }
 
 
