@@ -27,7 +27,7 @@ public class UserController extends MasterController {
 
     @GetMapping("/verify_registration/{encryptedId}")
     @ResponseStatus(HttpStatus.OK)
-    public UserResponseDTO verifyRegistration(@PathVariable String encryptedId) {
+    public String verifyRegistration(@PathVariable String encryptedId) {
         return userService.verifyRegistration(encryptedId);
     }
 
@@ -50,7 +50,7 @@ public class UserController extends MasterController {
             throw new BadRequestException("You are already logged");
         }
         UserResponseDTO dto = userService.login(userLoginWithEmailDTO);
-        sessionManager.setSession(request, dto.getId());
+        sessionManager.buildSessionInfo(request, dto.getId());
         return dto;
     }
 
@@ -61,7 +61,7 @@ public class UserController extends MasterController {
             throw new BadRequestException("You are already logged");
         }
         UserResponseDTO dto = userService.loginWithPhoneNum(userLoginWithEmailDTO);
-        sessionManager.setSession(request, dto.getId());
+        sessionManager.buildSessionInfo(request, dto.getId());
         return modelMapper.map(dto, UserResponseDTO.class);
     }
 
@@ -143,7 +143,7 @@ public class UserController extends MasterController {
 
     @PutMapping("/forgotten_password")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> forgottenPassword(@RequestParam(value = "email") String email, HttpServletRequest request){
+    public ResponseEntity<String> forgottenPassword(@RequestParam(value = "email") String email){
         return userService.forgottenPassword(email);
     }
 

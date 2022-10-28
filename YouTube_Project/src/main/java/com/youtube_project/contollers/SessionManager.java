@@ -33,10 +33,17 @@ public class SessionManager {
     }
 
     public Long getSessionUserId(HttpServletRequest request) {
-        return (long) request.getSession().getAttribute(USER_ID);
+
+        long loggedUserId;
+        if (request.getSession().getAttribute(USER_ID) == null){
+            loggedUserId = 0;
+        }else {
+            loggedUserId = (long)request.getSession().getAttribute(USER_ID);
+        }
+        return loggedUserId;
     }
 
-    public void setSession(HttpServletRequest request, long userId) {
+    public void buildSessionInfo(HttpServletRequest request, long userId) {
         HttpSession session = request.getSession();
         session.setAttribute(LOGGED, true);
         session.setAttribute(USER_ID, userId);
@@ -48,9 +55,4 @@ public class SessionManager {
         return request.getSession().getAttribute(LOGGED) != null;
     }
 
-    public void checkIfAuthorized(long uid,HttpServletRequest request) {
-        if (getSessionUserId(request) != uid){
-            throw new UnauthorizedException("You're not owner of the account");
-        }
-    }
 }

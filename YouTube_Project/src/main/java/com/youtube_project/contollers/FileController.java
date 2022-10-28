@@ -21,7 +21,7 @@ public class FileController extends MasterController{
     private StorageService storageService;
     @GetMapping("videos/download/{fileName}")
     @SneakyThrows
-    public ByteArrayResource download(@PathVariable String fileName, HttpServletRequest req, HttpServletResponse resp, String bucketName){
+    public ByteArrayResource download(@PathVariable String fileName, HttpServletRequest req, String bucketName){
         sessionManager.validateLogin(req);
         String filePath = "uploads" + File.separator + "videos" + File.separator + fileName;
         byte[] f = storageService.downloadFile(filePath,bucketName);

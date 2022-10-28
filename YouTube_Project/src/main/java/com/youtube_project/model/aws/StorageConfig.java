@@ -10,12 +10,8 @@ import org.springframework.cloud.aws.context.config.annotation.EnableContextInst
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 @Configuration
 @EnableContextInstanceData
-
 public class StorageConfig {
 
     @Value("${cloud.aws.credentials.access-key}")
