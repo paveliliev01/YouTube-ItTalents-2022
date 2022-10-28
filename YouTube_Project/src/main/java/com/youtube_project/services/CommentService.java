@@ -93,17 +93,14 @@ public class CommentService extends AbstractService {
         }
 
         List<Comment> comments = comment.getSubComments();
-        for (Comment comment1 : comments) {
-            commentRepository.deleteById(comment1.getId());
-        }
+        commentRepository.deleteAll(comments);
         commentRepository.deleteById(cid);
         return "Comment successfully deleted!";
     }
 
-    public String reactToComment(long vid, long cid, long uid, char reaction) {
+    public String reactToComment( long cid, long uid, char reaction) {
         Comment comment = getCommentById(cid);
         User user = getUserById(uid);
-        Video video = getVideoById(vid);
 
         CommentReactionKey commentReactionKey = new CommentReactionKey();
         commentReactionKey.setCommentId(cid);
@@ -115,9 +112,6 @@ public class CommentService extends AbstractService {
         commentReaction.setUser(user);
         commentReaction.setReaction(reaction);
 
-        if (video.getId() != comment.getVideo().getId()) {
-            throw new BadRequestException("This comment doesn't belong to the video!");
-        }
 
         if (commentReactionRepository.findById(commentReactionKey).isPresent()
                 && commentReactionRepository.findById(commentReactionKey).get().getReaction() == reaction) {
@@ -132,11 +126,14 @@ public class CommentService extends AbstractService {
     public CommentDTO replyToAComment(CommentAddDTO commentAddDTO, long cid, long uid) {
         Comment comment = getCommentById(cid);
         Comment commentReply = modelMapper.map(commentAddDTO, Comment.class);
-
+        if (comment.getParent() != null){
+            commentReply.setParent(comment.getParent());
+        }else{
+            commentReply.setParent(comment);
+        }
         commentReply.setOwner(getUserById(uid));
         commentReply.setText(commentReply.getText());
         commentReply.setVideo(comment.getVideo());
-        commentReply.setParent(comment);
         commentReply.setDateOfCreation(LocalDateTime.now());
 
         commentRepository.save(commentReply);
