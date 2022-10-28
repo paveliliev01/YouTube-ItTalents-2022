@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -69,7 +70,6 @@ public class UserService extends AbstractService {
         validateRegistrationInfo(userDTO);
 
         User u = modelMapper.map(userDTO, User.class);
-        System.out.println(u.toString());
         u.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         u.setDateOfBirth(LocalDate.parse(userDTO.getDateOfBirth()));
         userRepository.save(u);
@@ -195,7 +195,10 @@ public class UserService extends AbstractService {
             throw new BadRequestException("Phone number not valid!");
         }
         // check if phone number is registered
-        if (userRepository.findAllByPhoneNumber(user.getPhoneNumber()).size() > 0) {
+        if (userRepository.findAllByPhoneNumber(user.getPhoneNumber()).size() > 0 &&
+                userRepository.findAllByPhoneNumber(user.getPhoneNumber()).get(0).getId() != user.getId()) {
+            System.out.println(userRepository.findAllByPhoneNumber(user.getPhoneNumber()).get(0).getId());
+            System.out.println(user.getId());
             throw new BadRequestException("USER WITH SUCH PHONE NUMBER ALREADY EXISTS");
         }
         // check if roleId is valid
@@ -255,6 +258,7 @@ public class UserService extends AbstractService {
 
     public UserEditProfileDTO edit(long id, UserEditProfileDTO dto) {
 
+        dto.setId(id);
         validateEditableInfo(dto);
         User user = getUserById(id);
 
@@ -285,7 +289,7 @@ public class UserService extends AbstractService {
     public String subscribe(long subscribeToId, long uid) {
         User u = getUserById(uid);
         User userToSubscribeTo = getUserById(subscribeToId);
-        if (!u.isVerified()){
+        if (!u.isVerified()) {
             throw new UnauthorizedException("Please verify your account first!");
         }
         if (u.getSubscriptions().contains(userToSubscribeTo)) {
@@ -299,7 +303,7 @@ public class UserService extends AbstractService {
     public String unsubscribe(long subscribeToId, long uid) {
         User u = getUserById(uid);
         User userToSubscribeTo = getUserById(subscribeToId);
-        if (!u.isVerified()){
+        if (!u.isVerified()) {
             throw new UnauthorizedException("Please verify your account first!");
         }
         if (!u.getSubscriptions().contains(userToSubscribeTo)) {
@@ -318,7 +322,7 @@ public class UserService extends AbstractService {
         user.setProfilePhoto(photoURL);
         userRepository.save(user);
 
-        return "Successfully uploaded/uploaded your profile photo. Image name: " + photo.getName();
+        return "Successfully uploaded your profile photo";
     }
 
     private File convertMultipartFileToFIle(MultipartFile file) {
@@ -342,7 +346,7 @@ public class UserService extends AbstractService {
         user.setBackgroundImage(fileURL);
         userRepository.save(user);
 
-        return "Successfully uploaded/updated your background image. Image name: " + photo.getName();
+        return "Successfully uploaded your background image.";
     }
 
     private void saveAndReplacePhoto(MultipartFile photo, User user, String photoURL, String bucketName) {
@@ -372,7 +376,7 @@ public class UserService extends AbstractService {
 
     }
 
-    public UserResponseDTO verifyRegistration(String encryptedId) {
+    public String verifyRegistration(String encryptedId) {
         int id = 0;
         Pattern pattern = Pattern.compile("(?<=@)(.*?)(?=@)");
         Matcher matcher = pattern.matcher(encryptedId);
@@ -389,22 +393,23 @@ public class UserService extends AbstractService {
         javaMailSender.send(msg);
         userRepository.save(user);
 
-        return modelMapper.map(user, UserResponseDTO.class);
+        return user.getFirstName() + " " + user.getLastName() + ". Thanks for being part of our website. Your account has been verified!";
     }
 
+    @Transactional
     public ResponseEntity<String> forgottenPassword(String email) {
         User user = getUserByEmail(email);
         String newPassword = generateNewPassword(LENGTH);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        return sendSMSWithNewPassword(user,newPassword);
+        return sendSMSWithNewPassword(user, newPassword);
     }
 
-    private ResponseEntity<String> sendSMSWithNewPassword(User user,String newPassword) {
+    private ResponseEntity<String> sendSMSWithNewPassword(User user, String newPassword) {
 
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
 
-        Message.creator(new com.twilio.type.PhoneNumber("+359"+ user.getPhoneNumber().substring(1)),
+        Message.creator(new com.twilio.type.PhoneNumber("+359" + user.getPhoneNumber().substring(1)),
                 new com.twilio.type.PhoneNumber("+17432093191"), "Your new password is : " + newPassword).create();
 
         return new ResponseEntity<>("Message sent successfully", HttpStatus.OK);
@@ -436,7 +441,7 @@ public class UserService extends AbstractService {
 
     public String giveAdminPrivilege(long id, long loggedUserId) {
         User user = getUserById(loggedUserId);
-        if(!user.isAdmin()){
+        if (!user.isAdmin()) {
             throw new UnauthorizedException("Only admin can give admin privilege!");
         }
         User userToBeAdmin = getUserById(id);
