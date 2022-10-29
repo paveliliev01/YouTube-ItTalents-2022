@@ -1,6 +1,0 @@
-GET http://localhost:9301/users/61
-
-###
-
-POST http://localhost:9301/users/verify_registration/ + token
-
