@@ -156,6 +156,7 @@ public class UserService extends AbstractService {
         u.setEmail(id + "_DELETED ON " + LocalDateTime.now());
         u.setProfilePhoto(id + "_DELETED ON " + LocalDateTime.now());
         u.setPassword(id + "_DELETED ON " + LocalDateTime.now());
+        u.setDeleted(true);
         userRepository.save(u);
         return true;
     }
@@ -317,8 +318,9 @@ public class UserService extends AbstractService {
     public String uploadProfilePhoto(MultipartFile photo, long uid) {
         User user = getUserById(uid);
         String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-        String photoURL = "uploads" + File.separator + "profile_pictures" + File.separator + "profile_photo_user" + "_" + uid + "." + extension;
-        saveAndReplacePhoto(photo, user, photoURL, bucketNameForProfilePictures);
+        String photoName = "profile_photo_user" + "_" + uid + "." + extension;
+        saveAndReplacePhoto(photo, user, photoName, bucketNameForProfilePictures);
+        String photoURL = bucketNameForProfilePictures +"/"+photoName;
         user.setProfilePhoto(photoURL);
         userRepository.save(user);
 
@@ -339,38 +341,37 @@ public class UserService extends AbstractService {
     public String uploadBackgroundPhoto(MultipartFile photo, long uid) {
         User user = getUserById(uid);
         String extension = FilenameUtils.getExtension(photo.getOriginalFilename());
-        String fileURL = "uploads" + File.separator + "background_pictures" + File.separator + "background_picture_user" + "_" + uid + "." + extension;
-
-        saveAndReplacePhoto(photo, user, fileURL, bucketNameForProfileBackGroundImage);
-
-        user.setBackgroundImage(fileURL);
+        String photoName = "background_picture_user" + "_" + uid + "." + extension;
+        saveAndReplacePhoto(photo, user, photoName, bucketNameForProfileBackGroundImage);
+        String photoURL = bucketNameForProfileBackGroundImage+"/"+photoName;
+        user.setBackgroundImage(photoURL);
         userRepository.save(user);
 
         return "Successfully uploaded your background image.";
     }
 
-    private void saveAndReplacePhoto(MultipartFile photo, User user, String photoURL, String bucketName) {
-        delete(photoURL, user.getId(), bucketName);
+    private void saveAndReplacePhoto(MultipartFile photo, User user, String photoName, String bucketName) {
+        photoName = photoName.substring(photoName.lastIndexOf('/') + 1).trim();
+        delete(photoName, user.getId(), bucketName);
         File file1 = convertMultipartFileToFIle(photo);
-        s3Client.putObject(new PutObjectRequest(bucketName, photoURL, file1));
+        s3Client.putObject(new PutObjectRequest(bucketName, photoName, file1));
         file1.delete();
     }
 
-    public void delete(String photoURL, long loggedUserId, String bucketName) {
+    public void delete(String photoName, long loggedUserId, String bucketName) {
         User u = getUserById(loggedUserId);
+        //Holds the photo name
         String photo = null;
         if (bucketName.equals(bucketNameForProfilePictures)) {
             photo = u.getProfilePhoto();
         } else {
             photo = u.getBackgroundImage();
         }
+        //Used to trim the photo name from the url
         if (photo != null) {
-
-            if (!photo.equals(photoURL)) {
-                throw new UnauthorizedException("Wrong photo URL");
-            }
-            if (s3Client.doesObjectExist(bucketName, photoURL)) {
-                s3Client.deleteObject(bucketName, photoURL);
+            photo = photo.substring(photo.lastIndexOf('/') + 1).trim();
+            if (s3Client.doesObjectExist(bucketName, photoName)) {
+                s3Client.deleteObject(bucketName, photoName);
             }
         }
 

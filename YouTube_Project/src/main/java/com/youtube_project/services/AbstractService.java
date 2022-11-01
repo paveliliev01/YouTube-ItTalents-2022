@@ -1,6 +1,8 @@
 package com.youtube_project.services;
 
 import com.youtube_project.model.dtos.SearchDTO;
+import com.youtube_project.model.dtos.comment.CommentDTO;
+import com.youtube_project.model.dtos.comment.CommentResponseDTO;
 import com.youtube_project.model.dtos.user.UserResponseDTO;
 import com.youtube_project.model.dtos.video.VideoResponseDTO;
 import com.youtube_project.model.dtos.video.VideoWithNoOwnerDTO;
@@ -93,7 +95,34 @@ public class AbstractService {
         vDTO.setLikes(videoReactionRepository.findAllByVideoAndReaction(v,LIKE).size());
         vDTO.setDislikes(videoReactionRepository.findAllByVideoAndReaction(v,DISLIKE).size());
         vDTO.setViews(v.getViewers().size());
+
         return vDTO;
+    }
+
+    protected CommentResponseDTO commentToResponseDTO(Comment comment){
+        CommentResponseDTO commentResponseDTO = new CommentResponseDTO();
+        commentResponseDTO.setText(comment.getText());
+        commentResponseDTO.setId(comment.getId());
+        commentResponseDTO.setOwner(userToUserResponseDTO(comment.getOwner()));
+        commentResponseDTO.setLikes(commentReactionRepository.findAllByCommentAndReaction(comment,'l').size());
+        commentResponseDTO.setDislikes(commentReactionRepository.findAllByCommentAndReaction(comment,'d').size());
+
+        return commentResponseDTO;
+    }
+
+    protected boolean checkIfVideoOwnerIsDeleted(long vid){
+        return getVideoById(vid).getOwner().isDeleted();
+    }
+
+    protected CommentDTO commentToCommentDTO(Comment comment){
+        CommentDTO commentResponseDTO = new CommentDTO();
+        commentResponseDTO.setText(comment.getText());
+        commentResponseDTO.setId(comment.getId());
+        commentResponseDTO.setOwner(userToUserResponseDTO(comment.getOwner()));
+        commentResponseDTO.setLikes(commentReactionRepository.findAllByCommentAndReaction(comment,'l').size());
+        commentResponseDTO.setDislikes(commentReactionRepository.findAllByCommentAndReaction(comment,'d').size());
+
+        return commentResponseDTO;
     }
 
 }

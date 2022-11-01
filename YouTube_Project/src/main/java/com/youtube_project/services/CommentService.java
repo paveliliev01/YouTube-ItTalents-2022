@@ -48,10 +48,7 @@ public class CommentService extends AbstractService {
 
     private CommentResponseDTO getCommentAndSubComments(long cid) {
         Comment comment = getCommentById(cid);
-        CommentResponseDTO commentResponseDTO = new CommentResponseDTO();
-        commentResponseDTO.setText(comment.getText());
-        commentResponseDTO.setId(comment.getId());
-        commentResponseDTO.setOwner(userToUserResponseDTO(comment.getOwner()));
+        CommentResponseDTO commentResponseDTO = commentToResponseDTO(comment);
 
         List<CommentDTO> subComments = comment.getSubComments().stream().map(this::commentToCommentDTO).collect(Collectors.toList());
         commentResponseDTO.setSubComments(subComments);
@@ -60,12 +57,32 @@ public class CommentService extends AbstractService {
     }
 
     public List<CommentResponseDTO> getAllCommentsOfVideo(long vid) {
-        List<Comment> commentsOfVideo = getVideoById(vid).getComments();
-        List<CommentResponseDTO> commentDTOS = new ArrayList<>();
-        for (Comment comment : commentsOfVideo) {
-            commentDTOS.add(getCommentAndSubComments(comment.getId()));
+        Video video = getVideoById(vid);
+        if (video.getOwner().isDeleted()){
+            throw new NotFoundException("Video not found!");
+        }
+        List<Comment> commentsOfVideo = new ArrayList<>();
+        for (Comment comment : video.getComments()){
+            if (comment.getOwner().isDeleted()){
+                continue;
+            }
+            commentsOfVideo.add(comment);
         }
 
+        for (Comment comment : commentsOfVideo) {
+            for (int i = 0; i < comment.getSubComments().size(); i++) {
+                if (comment.getSubComments().get(i).getOwner().isDeleted()){
+                    comment.getSubComments().remove(i);
+                }
+            }
+        }
+        List<CommentResponseDTO> commentDTOS = new ArrayList<>();
+        for (Comment comment : commentsOfVideo) {
+            if (comment.getParent() != null || comment.getOwner().isDeleted()){
+                continue;
+            }
+            commentDTOS.add(getCommentAndSubComments(comment.getId()));
+        }
         return commentDTOS;
     }
 
@@ -142,7 +159,7 @@ public class CommentService extends AbstractService {
 
     }
 
-    private CommentDTO commentToCommentDTO(Comment comment) {
+    protected CommentDTO commentToCommentDTO(Comment comment) {
         CommentDTO commentDTO = new CommentDTO();
 
         commentDTO.setOwner(userToUserResponseDTO(comment.getOwner()));

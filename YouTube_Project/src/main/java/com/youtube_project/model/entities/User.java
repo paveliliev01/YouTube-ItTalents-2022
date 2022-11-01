@@ -2,7 +2,6 @@ package com.youtube_project.model.entities;
 
 import com.sun.istack.NotNull;
 import com.youtube_project.model.relationships.videoreactions.VideoReaction;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -86,5 +84,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private Set<Category> followedCategories;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    private boolean isDeleted;
+
 
 }

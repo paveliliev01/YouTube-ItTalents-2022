@@ -89,12 +89,13 @@ public class VideoService extends AbstractService {
 
 
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String videoURL = "uploads" + File.separator + "videos" + File.separator + System.nanoTime() + "_" + loggedUserId + "." + extension;
+        String videoName = System.nanoTime() + "_" + loggedUserId + "." + extension;
 
         File file1 = convertMultipartFileToFIle(file);
-        s3Client.putObject(new PutObjectRequest(bucketName, videoURL, file1));
+        s3Client.putObject(new PutObjectRequest(bucketName, videoName, file1));
         file1.delete();
 
+        String videoURL = bucketName + "/"+videoName;
         Video video = new Video();
         video.setTitle(title);
         video.setDescription(description);
@@ -155,8 +156,7 @@ public class VideoService extends AbstractService {
             user.getWatchedVideos().add(video);
             userRepository.save(user);
         }
-        VideoResponseDTO vDTO = videoToResponseVideoDTO(video);
-        return vDTO;
+        return videoToResponseVideoDTO(video);
     }
 
     public String delete(long vid, long loggedUserId) {

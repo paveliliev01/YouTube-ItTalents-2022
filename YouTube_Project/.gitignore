@@ -21,6 +21,7 @@ target/
 
 ### NetBeans ###
 /nbproject/private/
+!**/YouTube_Project/src/main/resources/
 /nbbuild/
 /dist/
 /nbdist/
